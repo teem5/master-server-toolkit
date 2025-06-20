@@ -1,32 +1,32 @@
-# Master Server Toolkit - Документация
+# Master Server Toolkit - Documentation
 
-## Описание
-Master Server Toolkit - это фреймворк для создания многопользовательских игр с архитектурой клиент-сервер. Он предоставляет готовые модули для аутентификации, профилей, комнат, лобби, чата и многих других аспектов многопользовательской игры.
+## Description
+Master Server Toolkit is a framework for creating multiplayer games using a client-server architecture. It provides ready-made modules for authentication, profiles, rooms, lobbies, chat and many other aspects of a multiplayer game.
 
-## Основные модули
+## Main Modules
 
-### Ядро системы
-- [Authentication](Modules/Authentication.md) - Аутентификация и управление пользователями
-- [Profiles](Modules/Profiles.md) - Профили пользователей и управление данными
-- [Rooms](Modules/Rooms.md) - Система комнат и игровых сессий
+### Core System
+- [Authentication](Modules/Authentication.md) - Authentication and user management
+- [Profiles](Modules/Profiles.md) - User profiles and data management
+- [Rooms](Modules/Rooms.md) - Room and game session system
 
-### Игровые модули
-- [Achievements](Modules/Achievements.md) - Система достижений
-- [Censor](Modules/Censor.md) - Фильтрация нежелательного контента
-- [Chat](Modules/Chat.md) - Система чата и обмена сообщениями
-- [Lobbies](Modules/Lobbies.md) - Система лобби перед игрой
-- [Matchmaker](Modules/Matchmaker.md) - Подбор игр и фильтрация по критериям
-- [Notification](Modules/Notification.md) - Система уведомлений
-- [Ping](Modules/Ping.md) - Проверка соединения и замер задержки
-- [QuestsModule](Modules/QuestsModule.md) - Система квестов и заданий
-- [WorldRooms](Modules/WorldRooms.md) - Система постоянных игровых зон
+### Game Modules
+- [Achievements](Modules/Achievements.md) - Achievements system
+- [Censor](Modules/Censor.md) - Unwanted content filtering
+- [Chat](Modules/Chat.md) - Chat and messaging system
+- [Lobbies](Modules/Lobbies.md) - Pre-game lobby system
+- [Matchmaker](Modules/Matchmaker.md) - Game matching and filtering
+- [Notification](Modules/Notification.md) - Notification system
+- [Ping](Modules/Ping.md) - Connection check and latency measurement
+- [QuestsModule](Modules/QuestsModule.md) - Quests and tasks system
+- [WorldRooms](Modules/WorldRooms.md) - Persistent world areas
 
-### Инфраструктура
-- [Spawner](Modules/Spawner.md) - Запуск игровых серверов 
-- [WebServer](Modules/WebServer.md) - Встроенный веб-сервер для API и админ-панели
+### Infrastructure
+- [Spawner](Modules/Spawner.md) - Game server launching
+- [WebServer](Modules/WebServer.md) - Built-in web server for API and admin panel
 
-### Аналитика и Мониторинг
-- [AnalyticsModule](Modules/AnalyticsModule.md) - Сбор и анализ игровых событий
+### Analytics and Monitoring
+- [AnalyticsModule](Modules/AnalyticsModule.md) - Game event collection and analysis
 
 ### Tools
 - [Tools](Tools/README.md) - Collection of helper utilities
@@ -36,51 +36,51 @@ Master Server Toolkit - это фреймворк для создания мно
   - [Tweener](Tools/Tweener.md) - Animation utilities
   - [Utilities](Tools/Utilities.md) - Helper functions
 
-## Структура модулей
+## Module Structure
 
-Каждый модуль обычно состоит из следующих компонентов:
-1. **Серверный модуль** (`*Module.cs`) - серверная логика модуля
-2. **Серверная реализация** (`*ModuleServer.cs`) - реализация API сервера
-3. **Клиентская часть** (`*ModuleClient.cs`) - клиентское API для взаимодействия с сервером
-4. **Пакеты** (`Packets/*.cs`) - структуры данных для обмена между клиентом и сервером
-5. **Интерфейсы и модели** - определение контрактов и объектов данных
+Each module typically consists of the following components:
+1. **Server module** (`*Module.cs`) - server-side logic of the module
+2. **Server implementation** (`*ModuleServer.cs`) - server API implementation
+3. **Client side** (`*ModuleClient.cs`) - client API for communicating with the server
+4. **Packets** (`Packets/*.cs`) - data structures exchanged between client and server
+5. **Interfaces and models** - definition of contracts and data objects
 
-## Начало работы
+## Getting Started
 
-1. **Настройка мастер-сервера**:
+1. **Setting up the master server:**
    ```csharp
-   // Добавление необходимых модулей
+   // Add required modules
    var authModule = gameObject.AddComponent<AuthModule>();
    var profilesModule = gameObject.AddComponent<ProfilesModule>();
    var roomsModule = gameObject.AddComponent<RoomsModule>();
-   
-   // Настройка подключения к базе данных
+
+   // Configure database connection
    gameObject.AddComponent<YourDatabaseFactory>();
    ```
 
-2. **Настройка клиента**:
+2. **Client setup:**
    ```csharp
-   // Подключение к серверу
+   // Connect to server
    Mst.Client.Connection.Connect("127.0.0.1", 5000, (successful, error) => {
        if (successful)
            Debug.Log("Подключение установлено");
    });
-   
-   // Использование модулей
+
+   // Use modules
    Mst.Client.Auth.SignIn(username, password, (successful, error) => {
        if (successful)
            Debug.Log("Аутентификация успешна");
    });
    ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Модульная архитектура** - добавляйте только те модули, которые вам нужны
-2. **Использование интерфейсов** - создавайте собственные реализации для интеграции с вашей системой
-3. **Безопасность** - всегда проверяйте права доступа на стороне сервера
-4. **Масштабирование** - используйте систему спаунеров для балансировки нагрузки
-5. **Планирование** - продумайте взаимодействие модулей заранее
+1. **Modular architecture** - add only the modules you need
+2. **Use interfaces** - create your own implementations to integrate with your system
+3. **Security** - always check permissions on the server side
+4. **Scalability** - use the spawner system to balance the load
+5. **Planning** - design module interaction in advance
 
-## Дополнительная информация
+## Additional Information
 
-Для более подробной информации обратитесь к документации соответствующих модулей.
+For more detailed information refer to the documentation of the respective modules.
