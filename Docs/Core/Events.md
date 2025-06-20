@@ -1,71 +1,71 @@
 # Master Server Toolkit - Events
 
-## Описание
-Система событий для коммуникации между компонентами без жестких связей. Включает каналы событий и типизированные сообщения.
+## Description
+An event system for communication between components without tight coupling. Includes event channels and typed messages.
 
 ## MstEventsChannel
 
-Канал для отправки и получения событий.
+Channel used to send and receive events.
 
-### Создание канала:
+### Creating a channel:
 ```csharp
-// Создание канала с обработкой исключений
+// Create a channel with exception handling
 var defaultChannel = new MstEventsChannel("default", true);
 
-// Создание простого канала
+// Create a simple channel
 var gameChannel = new MstEventsChannel("game");
 
-// Использование глобального канала
+// Use the global channel
 var globalChannel = Mst.Events;
 ```
 
-### Основные методы:
+### Main methods:
 ```csharp
-// Отправка события без данных
+// Invoke an event without data
 channel.Invoke("playerDied");
 
-// Отправка события с данными
+// Invoke an event with data
 channel.Invoke("scoreUpdated", 100);
 channel.Invoke("playerJoined", new Player("John"));
 
-// Подписка на события
+// Subscribe to events
 channel.AddListener("gameStarted", OnGameStarted);
 channel.AddListener("levelCompleted", OnLevelCompleted, true);
 
-// Отписка от событий
+// Unsubscribe from events
 channel.RemoveListener("gameStarted", OnGameStarted);
 channel.RemoveAllListeners("playerDied");
 ```
 
 ## EventMessage
 
-Контейнер для данных событий с типизированным доступом.
+Container for event data with typed access.
 
-### Создание и использование:
+### Creation and usage:
 ```csharp
-// Создание пустого сообщения
+// Create an empty message
 var emptyMsg = EventMessage.Empty;
 
-// Создание с данными
+// Create with data
 var scoreMsg = new EventMessage(150);
 var playerMsg = new EventMessage(new Player { Name = "Alex", Level = 10 });
 
-// Получение данных
+// Retrieve data
 int score = scoreMsg.As<int>();
 float damage = damageMsg.AsFloat();
 string text = textMsg.AsString();
 bool isWinner = resultMsg.AsBool();
 
-// Проверка наличия данных
+// Check if data exists
 if (message.HasData())
 {
     var data = message.As<MyData>();
 }
 ```
 
-## Примеры использования
+## Usage examples
 
-### 1. Игровые события:
+### 1. Game events:
 ```csharp
 public class GameManager : MonoBehaviour
 {
@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
     {
         gameEvents = new MstEventsChannel("game");
         
-        // Подписка на события
+        // Subscribe to events
         gameEvents.AddListener("playerJoined", OnPlayerJoined);
         gameEvents.AddListener("scoreChanged", OnScoreChanged);
         gameEvents.AddListener("gameOver", OnGameOver);
@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
         var player = msg.As<Player>();
         Debug.Log($"Player {player.Name} joined the game");
         
-        // Уведомляем других игроков
+        // Notify other players
         gameEvents.Invoke("playerListUpdated", GetPlayerList());
     }
     
@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
         int newScore = msg.AsInt();
         UpdateScoreUI(newScore);
         
-        // Проверка рекорда
+        // Check for a record
         if (newScore > highScore)
         {
             gameEvents.Invoke("newRecord", newScore);
@@ -104,13 +104,13 @@ public class GameManager : MonoBehaviour
 }
 ```
 
-### 2. UI события:
+### 2. UI events:
 ```csharp
 public class UIManager : MonoBehaviour
 {
     void Start()
     {
-        // Подписка на глобальные события
+        // Subscribe to global events
         Mst.Events.AddListener("connectionLost", OnConnectionLost);
         Mst.Events.AddListener("dataLoaded", OnDataLoaded);
         Mst.Events.AddListener("errorOccurred", OnError);
@@ -136,7 +136,7 @@ public class UIManager : MonoBehaviour
 }
 ```
 
-### 3. Межкомпонентная коммуникация:
+### 3. Inter-component communication:
 ```csharp
 public class InventorySystem : MonoBehaviour
 {
@@ -146,7 +146,7 @@ public class InventorySystem : MonoBehaviour
     {
         inventoryEvents = new MstEventsChannel("inventory");
         
-        // Подписка на игровые события
+        // Subscribe to game events
         Mst.Events.AddListener("itemDropped", OnItemDropped);
         Mst.Events.AddListener("playerDied", OnPlayerDied);
     }
@@ -155,13 +155,13 @@ public class InventorySystem : MonoBehaviour
     {
         if (CanAddItem(item))
         {
-            // Добавляем предмет
+            // Add item
             items.Add(item);
             
-            // Уведомляем о изменении инвентаря
+            // Notify about inventory change
             inventoryEvents.Invoke("itemAdded", item);
             
-            // Проверяем квесты
+            // Check quests
             if (IsQuestItem(item))
             {
                 Mst.Events.Invoke("questItemObtained", item);
@@ -175,44 +175,44 @@ public class InventorySystem : MonoBehaviour
 }
 ```
 
-## Именованные каналы
+## Named channels
 
-### Создание специализированных каналов:
+### Creating specialized channels:
 ```csharp
-// Канал для боевой системы
+// Channel for combat system
 var combatChannel = new MstEventsChannel("combat");
 combatChannel.AddListener("enemySpotted", OnEnemySpotted);
 combatChannel.AddListener("damageDealt", OnDamageDealt);
 
-// Канал для социальной системы
+// Channel for social system
 var socialChannel = new MstEventsChannel("social");
 socialChannel.AddListener("friendRequestReceived", OnFriendRequest);
 socialChannel.AddListener("messageReceived", OnChatMessage);
 
-// Канал для экономики
+// Channel for economy
 var economyChannel = new MstEventsChannel("economy");
 economyChannel.AddListener("purchaseCompleted", OnPurchase);
 economyChannel.AddListener("currencyChanged", OnCurrencyUpdate);
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте осмысленные имена событий**:
+1. **Use meaningful event names**:
 ```csharp
-// Хорошо
+// Good
 "playerJoinedLobby"
 "itemCraftingCompleted"
 "achievementUnlocked"
 
-// Плохо
+// Bad
 "event1"
 "update"
 "changed"
 ```
 
-2. **Типизируйте данные событий**:
+2. **Strongly type event data**:
 ```csharp
-// Определите структуры для сложных данных
+// Define structures for complex data
 public struct ScoreChangedData
 {
     public int oldScore;
@@ -220,7 +220,7 @@ public struct ScoreChangedData
     public string reason;
 }
 
-// Используйте их в событиях
+// Use them in events
 channel.Invoke("scoreChanged", new ScoreChangedData 
 { 
     oldScore = 100, 
@@ -229,43 +229,43 @@ channel.Invoke("scoreChanged", new ScoreChangedData
 });
 ```
 
-3. **Отписывайтесь от событий**:
+3. **Unsubscribe from events**:
 ```csharp
 void OnDestroy()
 {
-    // Отписка от всех событий
+    // Unsubscribe from all events
     Mst.Events.RemoveListener("playerJoined", OnPlayerJoined);
     channel.RemoveAllListeners();
 }
 ```
 
-4. **Используйте каналы для логической группировки**:
+4. **Use channels for logical grouping**:
 - Игровые события → "game"
 - UI события → "ui"
 - Сетевые события → "network"
 - Системные события → "system"
 
-5. **Обрабатывайте исключения**:
+5. **Handle exceptions**:
 ```csharp
-// При создании канала включайте обработку исключений
+// When creating a channel enable exception handling
 var channel = new MstEventsChannel("game", true);
 ```
 
-## Интеграция с другими системами
+## Integration with other systems
 
 ```csharp
-// Интеграция с аналитикой
+// Integration with analytics
 Mst.Events.AddListener("levelCompleted", (msg) => {
     var data = msg.As<LevelCompletionData>();
     Analytics.TrackLevelCompletion(data);
 });
 
-// Интеграция с сохранениями
+// Integration with saves
 Mst.Events.AddListener("gameStateChanged", (msg) => {
     SaveSystem.SaveGameState(msg.As<GameState>());
 });
 
-// Интеграция с сетью
+// Integration with networking
 Mst.Events.AddListener("playerAction", (msg) => {
     NetworkManager.SendPlayerAction(msg.As<PlayerAction>());
 });

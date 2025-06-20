@@ -1,133 +1,133 @@
-# Master Server Toolkit - Ядро системы
+# Master Server Toolkit - Core System
 
-## Общий обзор
-Ядро Master Server Toolkit состоит из базовых компонентов, которые обеспечивают фундаментальную функциональность для построения многопользовательских игр. Эти компоненты тесно взаимодействуют между собой, создавая гибкую и расширяемую архитектуру.
+## Overview
+The core of Master Server Toolkit consists of basic components that provide fundamental functionality for building multiplayer games. These components interact closely, creating a flexible and extensible architecture.
 
-## Структура ядра
+## Core structure
 
 ### [MasterServer](MasterServer.md)
-Центральный компонент, предоставляющий доступ ко всем системам через класс `Mst`. Содержит основные настройки и конфигурацию сервера.
+Central component that provides access to all systems through the `Mst` class. Contains main settings and server configuration.
 
 ### [Client](Client.md)
-Клиентская часть системы для подключения к серверу, отправки запросов и обработки ответов. Включает базовый класс для клиентских модулей.
+Client-side part of the system for connecting to the server, sending requests and handling responses. Includes a base class for client modules.
 
 ### [Server](Server.md)
-Серверная часть системы для обработки подключений, регистрации обработчиков сообщений и управления модулями.
+Server-side part of the system for handling connections, registering message handlers and managing modules.
 
 ### [Database](Database.md)
-Абстракция для работы с различными базами данных. Позволяет использовать разные хранилища данных без изменения основного кода.
+Abstraction for working with different databases. Allows using various data stores without changing the core code.
 
 ### [Events](Events.md)
-Система событий для обмена сообщениями между компонентами без жестких зависимостей. Основа для слабосвязанной архитектуры.
+Event system for message exchange between components without tight dependencies. Forms the basis for a loosely coupled architecture.
 
 ### [Keys](Keys.md)
-Система констант и ключей для унификации доступа к данным. Предотвращает ошибки из-за опечаток при работе со строковыми идентификаторами.
+System of constants and keys for unified data access. Prevents typos when working with string identifiers.
 
 ### [Localization](Localization.md)
-Система локализации для поддержки множества языков. Позволяет легко добавлять и менять переводы.
+Localization system that supports multiple languages. Allows easy addition and modification of translations.
 
 ### [Logger](Logger.md)
-Система логирования для отслеживания работы приложения. Поддерживает различные уровни логирования и форматирование.
+Logging system for tracking application operation. Supports various log levels and formatting.
 
 ### [Mail](Mail.md)
-Система для отправки email сообщений. Используется для подтверждения регистрации, восстановления пароля и других целей.
+System for sending email messages. Used for registration confirmation, password recovery and other purposes.
 
-## Взаимодействие компонентов
+## Component interaction
 
 ![Архитектура ядра](../Images/core_architecture.png)
 
-### Основные взаимосвязи:
+### Key relationships:
 
 1. **MasterServer** содержит центральный класс `Mst`, который предоставляет доступ ко всем другим компонентам:
    ```csharp
-   // Доступ к клиенту
+   // Access to the client
    Mst.Client
    
-   // Доступ к серверу
+   // Access to the server
    Mst.Server
    
-   // Доступ к системе событий
+   // Access to the event system
    Mst.Events
    ```
 
-2. **Client и Server** используют общую систему сетевых сообщений, но работают на разных сторонах соединения:
+2. **Client and Server** use a common network messaging system but operate on different sides of the connection:
    ```csharp
-   // На стороне клиента
+   // On the client side
    Mst.Client.Connection.SendMessage(MstOpCodes.SignIn, credentials);
    
-   // На стороне сервера
+   // On the server side
    server.RegisterMessageHandler(MstOpCodes.SignIn, HandleSignIn);
    ```
 
-3. **Database** используется серверными модулями для доступа к данным:
+3. **Database** is used by server modules to access data:
    ```csharp
-   // Получение аксессора базы данных
+   // Get database accessor
    var dbAccessor = Mst.Server.DbAccessors.GetAccessor<IAccountsDatabaseAccessor>();
    
-   // Использование аксессора
+   // Use accessor
    var account = await dbAccessor.GetAccountByUsername(username);
    ```
 
-4. **Events** используется всеми компонентами для слабосвязанного обмена информацией:
+4. **Events** is used by all components for loosely coupled information exchange:
    ```csharp
-   // Отправка события
+   // Send event
    Mst.Events.Invoke("userLoggedIn", userId);
    
-   // Подписка на событие
+   // Subscribe to event
    Mst.Events.AddListener("userLoggedIn", OnUserLoggedIn);
    ```
 
-5. **Logger** используется повсеместно для отладки и мониторинга:
+5. **Logger** is used everywhere for debugging and monitoring:
    ```csharp
-   // Логирование событий
+   // Logging events
    Mst.Logger.Debug("Connection established");
    Mst.Logger.Error($"Failed to connect: {error}");
    ```
 
-6. **Keys** используется для стандартизации доступа к данным:
+6. **Keys** is used to standardize data access:
    ```csharp
-   // Использование ключей
+   // Use keys
    properties.Set(MstDictKeys.USER_ID, userId);
    properties.Set(MstDictKeys.USER_NAME, username);
    ```
 
-7. **Localization** обеспечивает мультиязычность:
+7. **Localization** provides multilingual support:
    ```csharp
-   // Получение локализованной строки
+   // Get localized string
    string welcomeText = Mst.Localization.GetString("welcome_message");
    ```
 
-8. **Mail** используется серверными модулями для коммуникации с пользователями:
+8. **Mail** is used by server modules to communicate with users:
    ```csharp
-   // Отправка письма
+   // Send email
    await Mst.Server.Mail.SendEmailAsync(email, subject, body);
    ```
 
-## Процесс инициализации
+## Initialization process
 
-1. Создание экземпляра `MasterServerBehaviour`
-2. Определение настроек подключения (IP, порт, безопасность)
-3. Регистрация необходимых модулей
-4. Запуск сервера или подключение клиента
-5. Инициализация всех зарегистрированных модулей
-6. Установка необходимых обработчиков сообщений
+1. Create an instance of `MasterServerBehaviour`
+2. Define connection settings (IP, port, security)
+3. Register required modules
+4. Start the server or connect the client
+5. Initialize all registered modules
+6. Set up necessary message handlers
 
-## Принципы построения модулей
+## Module design principles
 
-Ядро предоставляет базовые классы для создания модулей:
-- `BaseServerModule` - Для серверных модулей
-- `BaseClientModule` - Для клиентских модулей
+The core provides base classes for creating modules:
+- `BaseServerModule` - for server modules
+- `BaseClientModule` - for client modules
 
-Модули следуют следующим принципам:
-1. **Единственная ответственность** - Каждый модуль отвечает за одну функциональность
-2. **Слабая связность** - Общение через события и общий интерфейс
-3. **Расширяемость** - Возможность наследования и переопределения базового поведения
-4. **Зависимость от абстракций** - Использование интерфейсов вместо конкретных реализаций
+Modules follow these principles:
+1. **Single responsibility** - each module is responsible for one feature
+2. **Loose coupling** - communicate via events and a common interface
+3. **Extensibility** - ability to inherit and override base behaviour
+4. **Dependence on abstractions** - use interfaces instead of concrete implementations
 
-## Рекомендации по работе с ядром
+## Recommendations for working with the core
 
-1. **Используйте события** вместо прямых вызовов для уменьшения связности
-2. **Инкапсулируйте логику** в специализированные модули
-3. **Следуйте архитектуре** базовых компонентов при создании своих
-4. **Используйте базовые классы** вместо создания с нуля
-5. **Документируйте интерфейсы** для облегчения дальнейшего сопровождения
+1. **Use events** instead of direct calls to reduce coupling
+2. **Encapsulate logic** in specialized modules
+3. **Follow the architecture** of the base components when creating your own
+4. **Use base classes** instead of building from scratch
+5. **Document interfaces** to simplify future maintenance

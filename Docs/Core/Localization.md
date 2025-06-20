@@ -1,67 +1,67 @@
 # Master Server Toolkit - Localization
 
-## Описание
-Система локализации для мультиязычной поддержки игры. Поддерживает загрузку переводов из текстовых файлов и динамическую смену языка.
+## Description
+Localization system for multilingual game support. Supports loading translations from text files and changing the language at runtime.
 
 ## MstLocalization
 
-Главный класс для работы с локализацией.
+Main class for working with localization.
 
-### Основные свойства:
+### Main properties:
 ```csharp
-// Текущий язык
+// Current language
 string Lang { get; set; }
 
-// Получение перевода по ключу
+// Get translation by key
 string this[string key] { get; }
 
-// Событие смены языка
+// Language change event
 event Action<string> LanguageChangedEvent;
 ```
 
-### Доступ к локализации:
+### Accessing localization:
 ```csharp
-// Через глобальный экземпляр
+// Via the global instance
 Mst.Localization.Lang = "ru";
 string welcomeText = Mst.Localization["welcome_message"];
 
-// Создание собственного экземпляра
+// Create your own instance
 var localization = new MstLocalization();
 ```
 
-## Формат файлов локализации
+## Localization file format
 
-### Структура файла:
+### File structure:
 ```
-# Комментарии начинаются с #
+# Comments start with #
 ;key;en;ru;de
 
-# Сообщения UI
+# UI messages
 ui_welcome;Welcome!;Добро пожаловать!;Willkommen!
 ui_loading;Loading...;Загрузка...;Wird geladen...
 ui_error;Error occurred;Произошла ошибка;Fehler aufgetreten
 
-# Игровые сообщения
+# Game messages
 game_start;Game Started;Игра началась;Spiel gestartet
 game_over;Game Over;Игра окончена;Spiel beendet
 
-# Кнопки
+# Buttons
 btn_ok;OK;ОК;OK
 btn_cancel;Cancel;Отмена;Abbrechen
 btn_save;Save;Сохранить;Speichern
 ```
 
-### Расположение файлов:
+### File location:
 ```
 Resources/
 └── Localization/
-    ├── localization.txt          # Основной файл
-    └── custom_localization.txt   # Кастомные переводы
+    ├── localization.txt          # Main file
+    └── custom_localization.txt   # Custom translations
 ```
 
-## Использование в коде
+## Using in code
 
-### Базовое использование:
+### Basic usage:
 ```csharp
 public class UIManager : MonoBehaviour
 {
@@ -72,10 +72,10 @@ public class UIManager : MonoBehaviour
     
     void Start()
     {
-        // Подписка на смену языка
+        // Subscribe to language changes
         Mst.Localization.LanguageChangedEvent += OnLanguageChanged;
         
-        // Установка начальных текстов
+        // Set initial texts
         UpdateTexts();
     }
     
@@ -93,7 +93,7 @@ public class UIManager : MonoBehaviour
 }
 ```
 
-### Создание компонента локализации:
+### Creating a localization component:
 ```csharp
 public class LocalizedText : MonoBehaviour
 {
@@ -128,7 +128,7 @@ public class LocalizedText : MonoBehaviour
 }
 ```
 
-### Смена языка с сохранением:
+### Changing language with saving:
 ```csharp
 public class LanguageSelector : MonoBehaviour
 {
@@ -139,11 +139,11 @@ public class LanguageSelector : MonoBehaviour
     
     void Start()
     {
-        // Загрузка сохраненного языка
+        // Load saved language
         string savedLang = PlayerPrefs.GetString("SelectedLanguage", "en");
         Mst.Localization.Lang = savedLang;
         
-        // Настройка выпадающего списка
+        // Configure dropdown
         SetupDropdown();
     }
     
@@ -172,10 +172,10 @@ public class LanguageSelector : MonoBehaviour
     {
         string newLang = availableLanguages[index];
         
-        // Смена языка
+        // Change the language
         Mst.Localization.Lang = newLang;
         
-        // Сохранение выбора
+        // Save selection
         PlayerPrefs.SetString("SelectedLanguage", newLang);
         PlayerPrefs.Save();
     }
@@ -185,7 +185,7 @@ public class LanguageSelector : MonoBehaviour
         switch (lang)
         {
             case "en": return "English";
-            case "ru": return "Русский";
+            case "ru": return "Russian";
             case "de": return "Deutsch";
             default: return lang.ToUpper();
         }
@@ -195,29 +195,29 @@ public class LanguageSelector : MonoBehaviour
 
 ## Динамическая локализация
 
-### Локализация с параметрами:
+### Localization with parameters:
 ```csharp
-// В файле локализации:
+// In the localization file:
 # player_score;Score: {0};Счет: {0};Punkte: {0}
 
-// В коде:
+// In code:
 string scoreText = string.Format(
     Mst.Localization["player_score"], 
     currentScore
 );
 
-// Или с помощью хелпера:
+// Or using a helper:
 public static string GetLocalizedFormat(string key, params object[] args)
 {
     string template = Mst.Localization[key];
     return string.Format(template, args);
 }
 
-// Использование:
+// Usage:
 string message = GetLocalizedFormat("welcome_player", playerName);
 ```
 
-### Локализация перечислений:
+### Enum localization:
 ```csharp
 public enum GameMode
 {
@@ -237,9 +237,9 @@ public static string GetLocalizedEnum<T>(T enumValue) where T : Enum
 # enum_GameMode_Multiplayer;Multiplayer;Многопользовательская игра;Mehrspieler
 ```
 
-## Расширенные возможности
+## Advanced features
 
-### Кастомный формат файлов:
+### Custom file format:
 ```csharp
 public class CustomLocalizationLoader
 {
@@ -283,7 +283,7 @@ public class Translation
 }
 ```
 
-### Локализация изображений:
+### Sprite localization:
 ```csharp
 public class LocalizedSprite : MonoBehaviour
 {
@@ -313,9 +313,9 @@ public class LocalizedSprite : MonoBehaviour
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте namespace для ключей**:
+1. **Use namespaces for keys**:
 ```
 ui_main_menu_title
 ui_settings_volume
@@ -323,12 +323,12 @@ game_message_victory
 error_network_timeout
 ```
 
-2. **Храните длинные тексты отдельно**:
+2. **Store long texts separately**:
 ```
 # tutorial_step1;Press [WASD] to move;Нажмите [WASD] для передвижения;...
 ```
 
-3. **Валидация переводов при старте**:
+3. **Validate translations on start**:
 ```csharp
 void ValidateTranslations()
 {
@@ -355,19 +355,19 @@ void ValidateTranslations()
 
 4. **Аргументы командной строки**:
 ```bash
-# Установка языка при запуске
+# Set language on launch
 ./Game.exe -defaultLanguage ru
 ```
 
-## Интеграция с системой событий
+## Integration with the event system
 
 ```csharp
-// Уведомление о смене языка
+// Notify about language change
 Mst.Localization.LanguageChangedEvent += (lang) => {
     Mst.Events.Invoke("languageChanged", lang);
 };
 
-// Уведомление об ошибках перевода
+// Notify about missing translations
 public static void ReportMissingTranslation(string key, string lang)
 {
     Mst.Events.Invoke("translationMissing", new { key, lang });
