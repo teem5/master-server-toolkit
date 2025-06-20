@@ -1,252 +1,252 @@
 # Master Server Toolkit - Utilities
 
-## Описание
-Набор универсальных утилит и вспомогательных классов для упрощения разработки. Включает паттерны проектирования, расширения стандартных типов, вспомогательные классы для Unity и многое другое.
+## Description
+A set of general-purpose utilities and helper classes that simplify development. It includes design patterns, extensions of standard types, helper classes for Unity, and much more.
 
-## Основные компоненты
+## Key Components
 
-### Шаблоны проектирования
+### Design Patterns
 
 #### Singleton
 ```csharp
-// Базовый синглтон для MonoBehaviour
+// Basic singleton for MonoBehaviour
 public class PlayerManager : SingletonBehaviour<PlayerManager>
 {
-    // Доступ из любого места проекта
+    // Accessible from anywhere in the project
     public static PlayerManager Instance => GetInstance();
-    
+
     public void DoSomething()
     {
-        // Реализация
+        // Implementation
     }
 }
 
-// Использование
+// Usage
 PlayerManager.Instance.DoSomething();
 ```
 
-#### Динамический Singleton
+#### Dynamic Singleton
 ```csharp
-// Автоматически создаваемый синглтон
+// Automatically created singleton
 public class AudioManager : DynamicSingletonBehaviour<AudioManager>
 {
-    // Будет создан на сцене, если отсутствует
+    // Created on the scene if it doesn't exist
     public static AudioManager Instance => GetInstance();
 }
 
-// Использование
+// Usage
 AudioManager.Instance.PlaySound("explosion");
 ```
 
-#### Глобальный Singleton
+#### Global Singleton
 ```csharp
-// Синглтон, который сохраняется при смене сцен
+// Singleton that persists across scenes
 public class GameManager : GlobalDynamicSingletonBehaviour<GameManager>
 {
-    // Переживает смену сцен
+    // Survives scene changes
     public static GameManager Instance => GetInstance();
 }
 
-// Использование
+// Usage
 GameManager.Instance.StartNewGame();
 ```
 
-#### Пул объектов
+#### Object Pool
 ```csharp
-// Создание пула для эффективного управления объектами
+// Pool for efficient object management
 public class BulletPool : MonoBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private int initialSize = 50;
-    
+
     private GenericPool<Bullet> bulletPool;
-    
+
     private void Awake()
     {
         bulletPool = new GenericPool<Bullet>(CreateBullet, initialSize);
     }
-    
+
     private Bullet CreateBullet()
     {
         return Instantiate(bulletPrefab);
     }
-    
+
     public Bullet GetBullet()
     {
         return bulletPool.Get();
     }
-    
+
     public void ReturnBullet(Bullet bullet)
     {
         bulletPool.Return(bullet);
     }
 }
 
-// Использование
+// Usage
 var bullet = bulletPool.GetBullet();
-// После использования
+// After using it
 bulletPool.ReturnBullet(bullet);
 ```
 
-#### Реестр объектов
+#### Object Registry
 ```csharp
-// Создание реестра для управления объектами по ключу
+// Registry for managing objects by key
 public class ItemRegistry : BaseRegistry<string, ItemData>
 {
-    // Методы регистрации уже реализованы в базовом классе
+    // Registration methods are implemented in the base class
 }
 
-// Использование
+// Usage
 var registry = new ItemRegistry();
-registry.Register("sword", new ItemData { /* данные */ });
+registry.Register("sword", new ItemData { /* data */ });
 var item = registry.Get("sword");
 ```
 
-### Расширения
+### Extensions
 
-#### Расширения для строк
+#### String Extensions
 ```csharp
-// Проверка строки на пустоту
+// Check if string is null or empty
 if (username.IsNullOrEmpty())
 {
-    // Обработка
+    // Handle
 }
 
-// Хеширование строки
+// Hash a string
 string passwordHash = password.GetMD5();
 
-// Преобразование в Base64
+// Convert to Base64
 string encoded = text.ToBase64();
 string decoded = encoded.FromBase64();
 
-// Извлечение последнего сегмента пути
+// Get last segment of a path
 string filename = filePath.GetLastSegment('\\');
 
-// Безопасное разделение строки
+// Split string safely
 string[] parts = path.SplitSafe('/');
 ```
 
-#### Расширения для массивов байтов
+#### Byte Array Extensions
 ```csharp
-// Преобразование в строку
+// Convert to string
 byte[] data = GetData();
 string text = data.ToString(StringFormat.Utf8);
 
-// Преобразование в Base64
+// Convert to Base64
 string base64 = data.ToBase64();
 
-// Создание подмассива
+// Create a subarray
 byte[] header = data.SubArray(0, 10);
 
-// Слияние массивов
+// Combine arrays
 byte[] fullPacket = headerBytes.CombineWith(bodyBytes);
 
-// Проверка на равенство
+// Check for equality
 if (hash1.BytesEqual(hash2))
 {
-    // Обработка
+    // Handle
 }
 ```
 
-#### Расширения для Transform
+#### Transform Extensions
 ```csharp
-// Сброс локальных трансформаций
+// Reset local transforms
 transform.ResetLocal();
 
-// Масштабирование всех дочерних объектов
+// Scale all child objects
 transform.ScaleAllChildren(0.5f);
 
-// Уничтожение всех дочерних объектов
+// Destroy all child objects
 transform.DestroyChildren();
 
-// Поиск в глубину
+// Recursive search
 var target = transform.FindRecursively("Player/Weapon/Barrel");
 
-// Установка локальной позиции по отдельным осям
+// Set local position on individual axes
 transform.SetLocalX(10f);
 transform.SetLocalY(5f);
 transform.SetLocalZ(0f);
 ```
 
-### Вспомогательные классы
+### Helper Classes
 
 #### ScenesLoader
 ```csharp
-// Асинхронная загрузка сцены с прогрессом
+// Asynchronously load a scene with progress
 ScenesLoader.LoadSceneAsync("Level1", (progress) => {
-    // Обновление индикатора загрузки
+    // Update loading indicator
     loadingBar.value = progress;
 }, () => {
-    // Вызывается по завершении загрузки
+    // Called when loading is complete
     Debug.Log("Load complete");
 });
 
-// Загрузка сцены с затемнением
+// Load a scene with fade
 ScenesLoader.LoadSceneWithFade("MainMenu", Color.black, 1.5f);
 
-// Перезагрузка текущей сцены
+// Reload the current scene
 ScenesLoader.ReloadCurrentScene();
 ```
 
 #### ScreenshotMaker
 ```csharp
-// Захват скриншота экрана
+// Capture a screenshot of the screen
 ScreenshotMaker.TakeScreenshot((texture) => {
-    // Использование полученной текстуры
+    // Use the captured texture
     screenshotImage.texture = texture;
 });
 
-// Сохранение скриншота в файл
+// Save screenshot to file
 ScreenshotMaker.SaveScreenshot("Screenshots/screenshot.png");
 
-// Захват скриншота определенной камеры
+// Capture screenshot from a specific camera
 ScreenshotMaker.TakeScreenshot(myCamera, 1920, 1080, (texture) => {
-    // Обработка
+    // Handle
 });
 ```
 
 #### SimpleNameGenerator
 ```csharp
-// Генерация случайных имен
+// Generate random names
 string randomName = SimpleNameGenerator.Generate(length: 6);
 
-// Генерация имени с заданным префиксом
+// Generate a name with a prefix
 string playerName = SimpleNameGenerator.Generate("Player_", 4);
 
-// Генерация имени из слогов
+// Generate a name from syllables
 string nameFromSyllables = SimpleNameGenerator.GenerateFromSyllables(3);
 
-// Создание уникального идентификатора
+// Create a unique identifier
 string uniqueId = SimpleNameGenerator.GenerateUniqueName();
 ```
 
 #### MstWebBrowser
 ```csharp
-// Открытие URL во внешнем браузере
+// Open a URL in the external browser
 MstWebBrowser.OpenURL("https://example.com");
 
-// Открытие URL с проверкой поддержки
+// Open a URL with capability check
 if (MstWebBrowser.CanOpenURL)
 {
     MstWebBrowser.OpenURL("https://example.com");
 }
 
-// Открытие локального HTML-файла
+// Open a local HTML file
 MstWebBrowser.OpenLocalFile("Documentation.html");
 ```
 
 #### NetWebRequests
 ```csharp
-// Отправка GET-запроса
+// Send a GET request
 NetWebRequests.Get("https://api.example.com/data", (success, response) => {
     if (success)
     {
-        // Обработка ответа
+        // Handle response
         Debug.Log(response);
     }
 });
 
-// Отправка POST-запроса
+// Send a POST request
 var data = new Dictionary<string, string>
 {
     { "username", "player1" },
@@ -260,29 +260,29 @@ NetWebRequests.Post("https://api.example.com/scores", data, (success, response) 
     }
 });
 
-// Загрузка текстуры
+// Load a texture
 NetWebRequests.GetTexture("https://example.com/image.jpg", (success, texture) => {
     if (success)
     {
-        // Использование текстуры
+        // Use the texture
         profileImage.texture = texture;
     }
 });
 ```
 
-### Сериализуемые структуры
+### Serializable Structures
 
 #### SerializedKeyValuePair
 ```csharp
-// Сериализуемая пара ключ-значение для использования в инспекторе Unity
+// Serializable key-value pair for Unity Inspector
 [Serializable]
 public class StringIntPair : SerializedKeyValuePair<string, int> { }
 
 public class InventoryManager : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private List<StringIntPair> startingItems = new List<StringIntPair>();
-    
+
     private void Start()
     {
         foreach (var item in startingItems)
@@ -290,51 +290,51 @@ public class InventoryManager : MonoBehaviour
             AddItem(item.Key, item.Value);
         }
     }
-    
+
     private void AddItem(string itemId, int count)
     {
-        // Реализация
+        // Implementation
     }
 }
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Создание игрового менеджера
+### Creating a Game Manager
 ```csharp
 public class GameManager : GlobalDynamicSingletonBehaviour<GameManager>
 {
-    // Состояние игры
+    // Game state
     public GameState CurrentState { get; private set; }
-    
-    // События
+
+    // Events
     public event Action<GameState> OnGameStateChanged;
-    
-    // Изменение состояния игры
+
+    // Change game state
     public void ChangeState(GameState newState)
     {
         CurrentState = newState;
         OnGameStateChanged?.Invoke(newState);
     }
-    
-    // Загрузка нового уровня
+
+    // Load a new level
     public void LoadLevel(int levelIndex)
     {
         ChangeState(GameState.Loading);
-        
+
         ScenesLoader.LoadSceneAsync($"Level_{levelIndex}", (progress) => {
-            // Обновление прогресса
+            // Update progress
         }, () => {
             ChangeState(GameState.Playing);
         });
     }
 }
 
-// Использование
+// Usage
 GameManager.Instance.LoadLevel(1);
 ```
 
-### Реализация системы пулинга
+### Implementing a Pooling System
 ```csharp
 public class EffectsPool : SingletonBehaviour<EffectsPool>
 {
@@ -345,23 +345,23 @@ public class EffectsPool : SingletonBehaviour<EffectsPool>
         public GameObject prefab;
         public int initialSize;
     }
-    
+
     [SerializeField] private List<EffectPoolData> effectsData;
-    
+
     private Dictionary<string, GenericPool<GameObject>> effectPools = new Dictionary<string, GenericPool<GameObject>>();
-    
+
     protected override void Awake()
     {
         base.Awake();
-        
-        // Инициализация пулов
+
+        // Initialize pools
         foreach (var data in effectsData)
         {
             var pool = new GenericPool<GameObject>(() => Instantiate(data.prefab), data.initialSize);
             effectPools.Add(data.effectId, pool);
         }
     }
-    
+
     public GameObject SpawnEffect(string effectId, Vector3 position, Quaternion rotation)
     {
         if (effectPools.TryGetValue(effectId, out var pool))
@@ -370,14 +370,14 @@ public class EffectsPool : SingletonBehaviour<EffectsPool>
             effect.transform.position = position;
             effect.transform.rotation = rotation;
             effect.SetActive(true);
-            
+
             return effect;
         }
-        
+
         Debug.LogWarning($"Effect {effectId} not found in pools");
         return null;
     }
-    
+
     public void ReturnEffect(string effectId, GameObject effect)
     {
         if (effectPools.TryGetValue(effectId, out var pool))
@@ -388,12 +388,12 @@ public class EffectsPool : SingletonBehaviour<EffectsPool>
     }
 }
 
-// Использование
+// Usage
 void PlayExplosion(Vector3 position)
 {
     var effect = EffectsPool.Instance.SpawnEffect("explosion", position, Quaternion.identity);
-    
-    // Автоматический возврат в пул через 2 секунды
+
+    // Automatically return to pool after 2 seconds
     StartCoroutine(ReturnAfterDelay("explosion", effect, 2f));
 }
 
@@ -404,34 +404,34 @@ IEnumerator ReturnAfterDelay(string effectId, GameObject effect, float delay)
 }
 ```
 
-### Создание менеджера настроек
+### Creating a Settings Manager
 ```csharp
 public class SettingsManager : SingletonBehaviour<SettingsManager>
 {
-    // Настройки
+    // Settings
     public float MasterVolume { get; private set; } = 1f;
     public float MusicVolume { get; private set; } = 0.8f;
     public float SfxVolume { get; private set; } = 1f;
     public int QualityLevel { get; private set; } = 2;
     public bool Fullscreen { get; private set; } = true;
-    
-    // События
+
+    // Events
     public event Action OnSettingsChanged;
-    
+
     private void Start()
     {
         LoadSettings();
     }
-    
+
     public void SetMasterVolume(float volume)
     {
         MasterVolume = Mathf.Clamp01(volume);
         OnSettingsChanged?.Invoke();
         SaveSettings();
     }
-    
-    // Аналогичные методы для других настроек
-    
+
+    // Similar methods for other settings
+
     private void SaveSettings()
     {
         PlayerPrefs.SetFloat("MasterVolume", MasterVolume);
@@ -441,7 +441,7 @@ public class SettingsManager : SingletonBehaviour<SettingsManager>
         PlayerPrefs.SetInt("Fullscreen", Fullscreen ? 1 : 0);
         PlayerPrefs.Save();
     }
-    
+
     private void LoadSettings()
     {
         MasterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
@@ -449,21 +449,21 @@ public class SettingsManager : SingletonBehaviour<SettingsManager>
         SfxVolume = PlayerPrefs.GetFloat("SfxVolume", 1f);
         QualityLevel = PlayerPrefs.GetInt("QualityLevel", 2);
         Fullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-        
+
         OnSettingsChanged?.Invoke();
     }
 }
 
-// Использование
+// Usage
 SettingsManager.Instance.SetMasterVolume(0.5f);
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте синглтоны с осторожностью** — они упрощают код, но могут создать проблемы с зависимостями
-2. **Предпочитайте пулинг для часто создаваемых/уничтожаемых объектов** — это значительно улучшит производительность
-3. **Используйте расширения методов для повышения читаемости кода**
-4. **Помните о статусе экспериментальных функций** — некоторые утилиты могут работать не на всех платформах
-5. **Избегайте излишнего усложнения** — использование утилит должно упрощать код, а не усложнять его
-6. **Максимально применяйте типизацию** для предотвращения ошибок в рантайме
-7. **Документируйте собственные расширения** этих утилит для поддержки кода в будущем
+1. **Use singletons carefully** – they simplify code but may cause dependency issues
+2. **Prefer pooling for frequently created/destroyed objects** – this greatly improves performance
+3. **Use method extensions to improve code readability**
+4. **Remember the experimental status** – some utilities may not work on all platforms
+5. **Avoid unnecessary complexity** – utilities should simplify your code, not complicate it
+6. **Favor strong typing** to prevent runtime errors
+7. **Document your own extensions** to these utilities for future maintenance
