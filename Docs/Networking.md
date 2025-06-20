@@ -1,8 +1,8 @@
 # Master Server Toolkit - Networking
 
-## Обзор архитектуры
+## Architecture Overview
 
-Сетевая система MST построена на гибкой архитектуре с поддержкой различных транспортных протоколов (WebSockets, TCP). Она обеспечивает надежную и безопасную передачу данных между клиентами и серверами.
+The MST networking system is built on a flexible architecture with support for different transport protocols (WebSockets, TCP). It provides reliable and secure data transfer between clients and servers.
 
 ```
 Networking
@@ -13,178 +13,178 @@ Networking
 └── Extensions
 ```
 
-## Основные компоненты
+## Main Components
 
-### Клиент-серверное взаимодействие
+### Client-Server Interaction
 
 #### IPeer
-Представляет соединение между сервером и клиентом.
+Represents a connection between the server and a client.
 
 ```csharp
-// Основные свойства
-int Id { get; }                    // Уникальный ID пира
-bool IsConnected { get; }          // Статус подключения
-DateTime LastActivity { get; set; } // Время последней активности
+// Main properties
+int Id { get; }                    // Unique peer ID
+bool IsConnected { get; }          // Connection status
+DateTime LastActivity { get; set; } // Time of last activity
 
-// События
-event PeerActionHandler OnConnectionOpenEvent;   // Подключение
-event PeerActionHandler OnConnectionCloseEvent;  // Отключение
+// Events
+event PeerActionHandler OnConnectionOpenEvent;   // Connection opened
+event PeerActionHandler OnConnectionCloseEvent;  // Disconnection
 
-// Расширяемость
-T AddExtension<T>(T extension);    // Добавление расширения
-T GetExtension<T>();               // Получение расширения
+// Extensibility
+T AddExtension<T>(T extension);    // Add extension
+T GetExtension<T>();               // Get extension
 ```
 
 #### IClientSocket
-Клиентский сокет для подключения к серверу.
+Client socket for connecting to a server.
 
 ```csharp
-// Основные свойства
-ConnectionStatus Status { get; }   // Статус подключения
-bool IsConnected { get; }          // Подключен ли
-string Address { get; }            // IP-адрес
-int Port { get; }                  // Порт
+// Main properties
+ConnectionStatus Status { get; }   // Connection status
+bool IsConnected { get; }          // Whether connected
+string Address { get; }            // IP address
+int Port { get; }                  // Port
 
-// Методы подключения
+// Connection methods
 IClientSocket Connect(string ip, int port, float timeoutSeconds);
 void Close(bool fireEvent = true);
 
-// Обработка сообщений
+// Message handling
 IPacketHandler RegisterMessageHandler(ushort opCode, IncommingMessageHandler handler);
 ```
 
 #### IServerSocket
-Серверный сокет для прослушивания подключений.
+Server socket for listening for connections.
 
 ```csharp
-// Безопасность
-bool UseSecure { get; set; }                 // Использовать SSL
-string CertificatePath { get; set; }         // Путь к сертификату
-string CertificatePassword { get; set; }     // Пароль сертификата
+// Security
+bool UseSecure { get; set; }                 // Use SSL
+string CertificatePath { get; set; }         // Certificate path
+string CertificatePassword { get; set; }     // Certificate password
 
-// События
-event PeerActionHandler OnPeerConnectedEvent;     // Подключение клиента
-event PeerActionHandler OnPeerDisconnectedEvent;  // Отключение клиента
+// Events
+event PeerActionHandler OnPeerConnectedEvent;     // Client connected
+event PeerActionHandler OnPeerDisconnectedEvent;  // Client disconnected
 
-// Методы прослушивания
-void Listen(int port);                          // Локальное прослушивание
-void Listen(string ip, int port);               // Прослушивание на IP:Port
+// Listening methods
+void Listen(int port);                          // Local listening
+void Listen(string ip, int port);               // Listen on IP:Port
 ```
 
-### Система сообщений
+### Messaging System
 
 #### IIncomingMessage
-Представляет входящее сообщение.
+Represents an incoming message.
 
 ```csharp
-// Основные свойства
-ushort OpCode { get; }             // Код операции
-byte[] Data { get; }               // Данные сообщения
-IPeer Peer { get; }                // Отправитель
+// Main properties
+ushort OpCode { get; }             // Operation code
+byte[] Data { get; }               // Message data
+IPeer Peer { get; }                // Sender
 
-// Методы чтения данных
-string AsString();                // Чтение данных как строки
-int AsInt();                      // Чтение данных как int
-float AsFloat();                  // Чтение данных как float
-T AsPacket<T>();                  // Десериализация в пакет
+// Data reading methods
+string AsString();                // Read data as string
+int AsInt();                      // Read data as int
+float AsFloat();                  // Read data as float
+T AsPacket<T>();                  // Deserialize to packet
 ```
 
 #### IOutgoingMessage
-Представляет исходящее сообщение.
+Represents an outgoing message.
 
 ```csharp
-// Основные свойства
-ushort OpCode { get; }             // Код операции
-byte[] Data { get; }               // Данные сообщения
+// Main properties
+ushort OpCode { get; }             // Operation code
+byte[] Data { get; }               // Message data
 
-// Методы отправки
-void Respond();                   // Отправка пустого ответа
-void Respond(byte[] data);        // Отправка бинарных данных
-void Respond(ISerializablePacket packet); // Отправка пакета
-void Respond(ResponseStatus status);      // Отправка статуса
+// Send methods
+void Respond();                   // Send empty response
+void Respond(byte[] data);        // Send binary data
+void Respond(ISerializablePacket packet); // Send packet
+void Respond(ResponseStatus status);      // Send status
 ```
 
 #### MessageFactory
-Фабрика для создания сообщений.
+Factory for creating messages.
 
 ```csharp
-// Создание сообщений
-IOutgoingMessage Create(ushort opCode);                 // Пустое сообщение
-IOutgoingMessage Create(ushort opCode, byte[] data);    // С бинарными данными
-IOutgoingMessage Create(ushort opCode, string data);    // Со строкой
-IOutgoingMessage Create(ushort opCode, int data);       // С числом
+// Message creation
+IOutgoingMessage Create(ushort opCode);                 // Empty message
+IOutgoingMessage Create(ushort opCode, byte[] data);    // With binary data
+IOutgoingMessage Create(ushort opCode, string data);    // With string
+IOutgoingMessage Create(ushort opCode, int data);       // With number
 ```
 
-### Сериализация данных
+### Data Serialization
 
 #### ISerializablePacket
-Интерфейс для сериализуемых пакетов.
+Interface for serializable packets.
 
 ```csharp
-// Обязательные методы
-void ToBinaryWriter(EndianBinaryWriter writer); // Сериализация
-void FromBinaryReader(EndianBinaryReader reader); // Десериализация
+// Required methods
+void ToBinaryWriter(EndianBinaryWriter writer); // Serialize
+void FromBinaryReader(EndianBinaryReader reader); // Deserialize
 ```
 
 #### SerializablePacket
-Базовый класс для сериализуемых пакетов.
+Base class for serializable packets.
 
 ```csharp
-// Реализует ISerializablePacket
-// Предоставляет базовые методы для наследников
+// Implements ISerializablePacket
+// Provides basic methods for inheritors
 ```
 
 #### Serializer
-Утилиты для бинарной сериализации.
+Utilities for binary serialization.
 
 ```csharp
-byte[] Serialize(object data);    // Сериализация объекта в байты
-T Deserialize<T>(byte[] bytes);   // Десериализация байтов в объект
+byte[] Serialize(object data);    // Serialize object to bytes
+T Deserialize<T>(byte[] bytes);   // Deserialize bytes to object
 ```
 
-## Транспортный слой
+## Transport Layer
 
 ### WebSocketSharp
 
 ```csharp
-// Клиентский сокет
+// Client socket
 WsClientSocket clientSocket = new WsClientSocket();
 clientSocket.Connect("127.0.0.1", 5000);
 
-// Серверный сокет
+// Server socket
 WsServerSocket serverSocket = new WsServerSocket();
 serverSocket.Listen(5000);
 ```
 
-## Шаблоны использования
+## Usage Patterns
 
-### Регистрация обработчиков
+### Registering Handlers
 
 ```csharp
-// Регистрация обработчика
+// Register handler
 client.RegisterMessageHandler(MstOpCodes.Ping, OnPingMessageHandler);
 
-// Обработчик
+// Handler
 private void OnPingMessageHandler(IIncomingMessage message)
 {
-    // Отправка ответа
+    // Send response
     message.Respond("Pong");
 }
 ```
 
-### Отправка сообщений
+### Sending Messages
 
 ```csharp
-// Простая отправка
+// Simple send
 client.SendMessage(MstOpCodes.Ping);
 
-// Отправка с данными
+// Send with data
 client.SendMessage(MstOpCodes.Auth, "username:password");
 
-// Отправка пакета
+// Send packet
 client.SendMessage(MstOpCodes.JoinLobby, new JoinLobbyPacket{ LobbyId = 123 });
 
-// Отправка с ожиданием ответа
+// Send and wait for response
 client.SendMessage(MstOpCodes.GetRooms, (status, response) =>
 {
     if (status == ResponseStatus.Success)
@@ -195,7 +195,7 @@ client.SendMessage(MstOpCodes.GetRooms, (status, response) =>
 });
 ```
 
-### Создание пакетов
+### Creating Packets
 
 ```csharp
 public class PlayerInfoPacket : SerializablePacket
@@ -203,14 +203,14 @@ public class PlayerInfoPacket : SerializablePacket
     public int PlayerId { get; set; }
     public string Name { get; set; }
     public float Score { get; set; }
-    
+
     public override void ToBinaryWriter(EndianBinaryWriter writer)
     {
         writer.Write(PlayerId);
         writer.Write(Name);
         writer.Write(Score);
     }
-    
+
     public override void FromBinaryReader(EndianBinaryReader reader)
     {
         PlayerId = reader.ReadInt32();
@@ -220,36 +220,36 @@ public class PlayerInfoPacket : SerializablePacket
 }
 ```
 
-## Безопасность и производительность
+## Security and Performance
 
-### Защищенные соединения (SSL/TLS)
+### Secure Connections (SSL/TLS)
 
 ```csharp
-// Настройка SSL клиента
+// Configure SSL client
 clientSocket.UseSecure = true;
 
-// Настройка SSL сервера
+// Configure SSL server
 serverSocket.UseSecure = true;
 serverSocket.CertificatePath = "certificate.pfx";
 serverSocket.CertificatePassword = "password";
 ```
 
-### Управление таймаутами
+### Timeout Management
 
 ```csharp
-// Установка таймаута подключения
-client.Connect("127.0.0.1", 5000, 10); // 10 секунд таймаут
+// Set connection timeout
+client.Connect("127.0.0.1", 5000, 10); // 10 second timeout
 
-// Установка таймаута ответа
-client.SendMessage(opCode, data, callback, 5); // 5 секунд таймаут
+// Set response timeout
+client.SendMessage(opCode, data, callback, 5); // 5 second timeout
 ```
 
-### Методы доставки
+### Delivery Methods
 
 ```csharp
-// Надежная доставка (гарантирует доставку)
+// Reliable delivery (guaranteed)
 peer.SendMessage(message, DeliveryMethod.Reliable);
 
-// Ненадежная доставка (быстрее, но без гарантий)
+// Unreliable delivery (faster but no guarantee)
 peer.SendMessage(message, DeliveryMethod.Unreliable);
 ```
