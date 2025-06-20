@@ -1,13 +1,13 @@
 # Master Server Toolkit - Authentication
 
-## Описание
-Модуль аутентификации для регистрации, входа в систему, восстановления паролей и управления пользователями.
+## Description
+Authentication module for registration, login, password recovery, and user management.
 
 ## AuthModule
 
-Основной класс модуля аутентификации.
+Main class of the authentication module.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Settings")]
 [SerializeField] private int usernameMinChars = 4;
@@ -24,39 +24,39 @@
 [SerializeField] private int tokenExpiresInDays = 7;
 ```
 
-### Типы аутентификации:
+### Authentication types:
 
-#### 1. По имени и паролю:
+#### 1. By username and password:
 ```csharp
-// Клиент отправляет
+// Client sends
 var credentials = new MstProperties();
 credentials.Set(MstDictKeys.USER_NAME, "playerName");
 credentials.Set(MstDictKeys.USER_PASSWORD, "password123");
 credentials.Set(MstDictKeys.USER_DEVICE_ID, "device123");
 credentials.Set(MstDictKeys.USER_DEVICE_NAME, "iPhone 12");
 
-// Шифрование и отправка
+// Encrypt and send
 var encryptedData = Mst.Security.EncryptAES(credentials.ToBytes(), aesKey);
 Mst.Client.Connection.SendMessage(MstOpCodes.SignIn, encryptedData);
 ```
 
-#### 2. По email:
+#### 2. By email:
 ```csharp
-// Отправляет пароль на email
+// Send password to email
 var credentials = new MstProperties();
 credentials.Set(MstDictKeys.USER_EMAIL, "player@game.com");
 Mst.Client.Connection.SendMessage(MstOpCodes.SignIn, credentials);
 ```
 
-#### 3. По токену:
+#### 3. By token:
 ```csharp
-// Автоматический вход
+// Automatic login
 var credentials = new MstProperties();
 credentials.Set(MstDictKeys.USER_AUTH_TOKEN, savedToken);
 Mst.Client.Connection.SendMessage(MstOpCodes.SignIn, credentials);
 ```
 
-#### 4. Гостевой вход:
+#### 4. Guest login:
 ```csharp
 var credentials = new MstProperties();
 credentials.Set(MstDictKeys.USER_IS_GUEST, true);
@@ -64,43 +64,42 @@ credentials.Set(MstDictKeys.USER_DEVICE_ID, "device123");
 Mst.Client.Connection.SendMessage(MstOpCodes.SignIn, credentials);
 ```
 
-## Регистрация
-
+## Registration
 ```csharp
-// Создание аккаунта
+// Create an account
 var credentials = new MstProperties();
 credentials.Set(MstDictKeys.USER_NAME, "newPlayer");
 credentials.Set(MstDictKeys.USER_PASSWORD, "securePassword");
 credentials.Set(MstDictKeys.USER_EMAIL, "new@player.com");
 
-// Шифрование
+// Encryption
 var encrypted = Mst.Security.EncryptAES(credentials.ToBytes(), aesKey);
 Mst.Client.Connection.SendMessage(MstOpCodes.SignUp, encrypted);
 ```
 
-## Управление пользователями
+## User management
 
-### Работа с залогиненными пользователями:
+### Working with logged in users:
 ```csharp
-// Получить пользователя
+// Get a user
 var user = authModule.GetLoggedInUserByUsername("playerName");
 var user = authModule.GetLoggedInUserById("userId");
 var user = authModule.GetLoggedInUserByEmail("email@game.com");
 
-// Проверить залогинен ли
+// Check if online
 bool isOnline = authModule.IsUserLoggedInByUsername("playerName");
 
-// Получить всех онлайн
+// Get all online
 var allOnline = authModule.LoggedInUsers;
 
-// Разлогинить
+// Sign out
 authModule.SignOut("playerName");
 authModule.SignOut(userExtension);
 ```
 
-### События:
+### Events:
 ```csharp
-// Подписка на события
+// Subscribe to events
 authModule.OnUserLoggedInEvent += (user) => {
     Debug.Log($"User {user.Username} logged in");
 };
@@ -114,17 +113,17 @@ authModule.OnUserRegisteredEvent += (peer, account) => {
 };
 ```
 
-## Восстановление пароля
+## Password recovery
 
-### Запрос кода:
+### Requesting a code:
 ```csharp
-// Клиент запрашивает код
+// Client requests a code
 Mst.Connection.SendMessage(MstOpCodes.GetPasswordResetCode, "email@game.com");
 
-// Сервер отправляет код на email
+// Server sends the code by email
 ```
 
-### Смена пароля:
+### Changing the password:
 ```csharp
 var data = new MstProperties();
 data.Set(MstDictKeys.RESET_PASSWORD_EMAIL, "email@game.com");
@@ -134,20 +133,18 @@ data.Set(MstDictKeys.RESET_PASSWORD, "newPassword");
 Mst.Connection.SendMessage(MstOpCodes.ChangePassword, data);
 ```
 
-## Подтверждение email
-
+## Email confirmation
 ```csharp
-// Запрос кода подтверждения
+// Request confirmation code
 Mst.Connection.SendMessage(MstOpCodes.GetEmailConfirmationCode);
 
-// Подтверждение email
+// Confirm email
 Mst.Connection.SendMessage(MstOpCodes.ConfirmEmail, "confirmationCode");
 ```
 
-## Дополнительные свойства
-
+## Additional properties
 ```csharp
-// Привязка дополнительных данных
+// Bind extra data
 var extraProps = new MstProperties();
 extraProps.Set("playerLevel", 10);
 extraProps.Set("gameClass", "warrior");
@@ -155,29 +152,28 @@ extraProps.Set("gameClass", "warrior");
 Mst.Connection.SendMessage(MstOpCodes.BindExtraProperties, extraProps);
 ```
 
-## Настройка базы данных
-
+## Database setup
 ```csharp
-// Реализация IAccountsDatabaseAccessor
+// Implementation of IAccountsDatabaseAccessor
 public class MyDatabaseAccessor : IAccountsDatabaseAccessor
 {
     public async Task<IAccountInfoData> GetAccountByUsernameAsync(string username)
     {
-        // Получение аккаунта из БД
+        // Get the account from DB
     }
-    
+
     public async Task InsertAccountAsync(IAccountInfoData account)
     {
-        // Сохранение нового аккаунта
+        // Save a new account
     }
-    
+
     public async Task UpdateAccountAsync(IAccountInfoData account)
     {
-        // Обновление аккаунта
+        // Update the account
     }
 }
 
-// Создание фабрики
+// Create the factory
 public class DatabaseFactory : DatabaseAccessorFactory
 {
     public override void CreateAccessors()
@@ -188,30 +184,28 @@ public class DatabaseFactory : DatabaseAccessorFactory
 }
 ```
 
-## Проверка прав доступа
-
+## Permission checks
 ```csharp
-// Получение информации о пире
+// Get peer info
 Mst.Connection.SendMessage(MstOpCodes.GetAccountInfoByPeer, peerId);
 Mst.Connection.SendMessage(MstOpCodes.GetAccountInfoByUsername, "playerName");
 
-// Требует минимальный уровень прав
+// Require minimum permission level
 authModule.getPeerDataPermissionsLevel = 10;
 ```
 
-## Кастомизация валидации
-
+## Validation customization
 ```csharp
-// Переопределение в наследнике AuthModule
+// Override in a derived AuthModule
 protected override bool IsUsernameValid(string username)
 {
     if (!base.IsUsernameValid(username))
         return false;
-    
-    // Дополнительные проверки
+
+    // Additional checks
     if (username.Contains("admin"))
         return false;
-    
+
     return true;
 }
 
@@ -219,22 +213,21 @@ protected override bool IsPasswordValid(string password)
 {
     if (!base.IsPasswordValid(password))
         return false;
-    
-    // Проверка на сложность
+
+    // Complexity check
     bool hasUpper = password.Any(char.IsUpper);
     bool hasNumber = password.Any(char.IsDigit);
-    
+
     return hasUpper && hasNumber;
 }
 ```
 
-## Интеграция с email
-
+## Email integration
 ```csharp
-// Настройка mailer компонента
+// Configure mailer component
 [SerializeField] protected Mailer mailer;
 
-// Настройка Smtp (в SmtpMailer)
+// SMTP settings (in SmtpMailer)
 smtpHost = "smtp.gmail.com";
 smtpPort = 587;
 smtpUsername = "yourgame@gmail.com";
@@ -242,22 +235,21 @@ smtpPassword = "app-password";
 mailFrom = "noreply@yourgame.com";
 ```
 
-## Аргументы командной строки
-
+## Command line arguments
 ```bash
-# Токен настройки
+# Token settings
 ./Server.exe -tokenSecret mysecret -tokenExpires 30
 
-# Настройка issuer/audience
+# Issuer/audience settings
 ./Server.exe -tokenIssuer http://mygame.com -tokenAudience http://mygame.com/users
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Всегда шифруйте пароли перед отправкой**
-2. **Используйте токены для автовхода**
-3. **Храните конфиденциальные данные в базе**
-4. **Настройте email для восстановления паролей**
-5. **Проверяйте имена на цензуру с помощью CensorModule**
-6. **Ограничивайте количество попыток входа**
-7. **Используйте HTTPS для production**
+1. **Always encrypt passwords before sending**
+2. **Use tokens for auto login**
+3. **Store sensitive data in a database**
+4. **Configure email for password recovery**
+5. **Check names for profanity with CensorModule**
+6. **Limit login attempts**
+7. **Use HTTPS in production**

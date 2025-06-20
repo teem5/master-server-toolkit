@@ -1,13 +1,13 @@
 # Master Server Toolkit - Achievements
 
-## Описание
-Модуль достижений для создания, отслеживания и разблокировки достижений игроков. Интегрируется с профилями пользователей для сохранения прогресса.
+## Description
+An achievements module for creating, tracking, and unlocking player achievements. Integrates with user profiles to save progress.
 
 ## AchievementsModule
 
-Основной класс модуля достижений.
+Main class of the achievements module.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Permission")]
 [SerializeField] protected bool clientCanUpdateProgress = false;
@@ -16,31 +16,31 @@
 [SerializeField] protected AchievementsDatabase achievementsDatabase;
 ```
 
-### Зависимости:
-Модуль требует наличия:
-- AuthModule - для аутентификации пользователей
-- ProfilesModule - для сохранения прогресса достижений
+### Dependencies:
+The module requires:
+- AuthModule - for user authentication
+- ProfilesModule - for storing achievement progress
 
-## Создание базы данных достижений
+## Creating the achievements database
 
 ### AchievementsDatabase:
 ```csharp
-// Создание ScriptableObject с достижениями
+// Create a ScriptableObject with achievements
 [CreateAssetMenu(menuName = "Master Server Toolkit/Achievements Database")]
 public class AchievementsDatabase : ScriptableObject
 {
     [SerializeField] private List<AchievementData> achievements = new List<AchievementData>();
-    
+
     public IReadOnlyCollection<AchievementData> Achievements => achievements;
 }
 ```
 
-### Определение достижений:
+### Defining achievements:
 ```csharp
-// Создание в Unity Editor
+// Created in Unity Editor
 var database = ScriptableObject.CreateInstance<AchievementsDatabase>();
 
-// Добавление достижений
+// Add achievements
 database.Add(new AchievementData
 {
     Key = "first_victory",
@@ -61,24 +61,24 @@ database.Add(new AchievementData
     Unlockable = true
 });
 
-// Сохранение базы достижений
+// Save the achievement database
 AssetDatabase.CreateAsset(database, "Assets/Resources/AchievementsDatabase.asset");
 AssetDatabase.SaveAssets();
 ```
 
-## Типы достижений
+## Achievement types
 
 ### AchievementType:
 ```csharp
 public enum AchievementType
 {
-    Normal,         // Обычное достижение (0/1)
-    Incremental,    // Постепенное достижение (0/N)
-    Infinite        // Бесконечное достижение (трекинг без разблокировки)
+    Normal,         // Regular achievement (0/1)
+    Incremental,    // Incremental achievement (0/N)
+    Infinite        // Endless achievement (tracking only)
 }
 ```
 
-### Структура данных достижения:
+### Achievement data structure:
 ```csharp
 [Serializable]
 public class AchievementData
@@ -91,7 +91,7 @@ public class AchievementData
     public bool Unlockable;
     public Sprite Icon;
     public AchievementExtraData[] ResultCommands;
-    
+
     [Serializable]
     public class AchievementExtraData
     {
@@ -101,34 +101,34 @@ public class AchievementData
 }
 ```
 
-## Обновление прогресса достижений
+## Updating achievement progress
 
-### Со стороны сервера:
+### Server side:
 ```csharp
-// Получить модуль
+// Get the module
 var achievementsModule = Mst.Server.Modules.GetModule<AchievementsModule>();
 
-// Обновить прогресс достижения
+// Update achievement progress
 void UpdateAchievement(string userId, string achievementKey, int progress)
 {
     var packet = new UpdateAchievementProgressPacket
     {
-        userId = userId, 
+        userId = userId,
         key = achievementKey,
         progress = progress
     };
-    
-    // Отправить пакет обновления
+
+    // Send update packet
     Mst.Server.SendMessage(MstOpCodes.ServerUpdateAchievementProgress, packet);
 }
 
-// Пример использования
+// Example usage
 UpdateAchievement(user.UserId, "first_victory", 1);
 ```
 
-### Со стороны клиента (если разрешено):
+### Client side (if allowed):
 ```csharp
-// Клиентский запрос на обновление прогресса
+// Client request to update progress
 void UpdateAchievement(string achievementKey, int progress)
 {
     var packet = new UpdateAchievementProgressPacket
@@ -136,7 +136,7 @@ void UpdateAchievement(string achievementKey, int progress)
         key = achievementKey,
         progress = progress
     };
-    
+
     Mst.Client.Connection.SendMessage(MstOpCodes.ClientUpdateAchievementProgress, packet, (status, response) =>
     {
         if (status == ResponseStatus.Success)
@@ -147,39 +147,38 @@ void UpdateAchievement(string achievementKey, int progress)
 }
 ```
 
-## Интеграция с профилями
+## Profile integration
 
-Достижения автоматически синхронизируются с профилями пользователей через свойство профиля:
-
+Achievements are automatically synchronized with user profiles through the profile property:
 ```csharp
-// Регистрация свойства достижений в ProfilesModule
+// Register the achievements property in ProfilesModule
 profilesModule.RegisterProperty(ProfilePropertyOpCodes.achievements, null, () =>
 {
     return new ObservableAchievements();
 });
 
-// Получение достижений из профиля
+// Retrieve achievements from the profile
 void GetAchievements(ObservableServerProfile profile)
 {
     if (profile.TryGet(ProfilePropertyOpCodes.achievements, out ObservableAchievements achievements))
     {
-        // Список всех достижений пользователя
+        // List of all player achievements
         var allAchievements = achievements.GetAll();
-        
-        // Проверка разблокировано ли достижение
+
+        // Check if the achievement is unlocked
         bool isUnlocked = achievements.IsUnlocked("first_victory");
-        
-        // Получить прогресс достижения
+
+        // Get achievement progress
         int progress = achievements.GetProgress("win_streak");
     }
 }
 ```
 
-## Отслеживание событий разблокировки
+## Tracking unlock events
 
-### Подписка на события клиента:
+### Subscribing on the client:
 ```csharp
-// В клиентском классе
+// In the client class
 private void Start()
 {
     Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.ClientAchievementUnlocked, OnAchievementUnlocked);
@@ -189,18 +188,17 @@ private void OnAchievementUnlocked(IIncomingMessage message)
 {
     string achievementKey = message.AsString();
     Debug.Log($"Achievement unlocked: {achievementKey}");
-    
-    // Показать интерфейс разблокировки достижения
+
+    // Show the achievement unlock UI
     ShowAchievementUnlockedUI(achievementKey);
 }
 ```
 
-## Настройка наград за достижения
+## Configuring achievement rewards
 
-Модуль позволяет настроить команды, которые будут выполнены при разблокировке достижения:
-
+The module allows you to set commands that are executed when an achievement is unlocked:
 ```csharp
-// Настройка ResultCommands в достижении
+// Setting ResultCommands in an achievement
 var achievement = new AchievementData
 {
     Key = "100_matches_played",
@@ -209,8 +207,8 @@ var achievement = new AchievementData
     Type = AchievementType.Incremental,
     MaxProgress = 100,
     Unlockable = true,
-    
-    // Команды для выполнения при разблокировке
+
+    // Commands to execute when unlocked
     ResultCommands = new[]
     {
         new AchievementExtraData
@@ -227,9 +225,9 @@ var achievement = new AchievementData
 };
 ```
 
-### Обработка команд:
+### Handling commands:
 ```csharp
-// Расширение модуля для обработки команд
+// Extending the module to handle commands
 public class MyAchievementsModule : AchievementsModule
 {
     protected override void OnAchievementResultCommand(IUserPeerExtension user, string key, AchievementExtraData[] resultCommands)
@@ -241,50 +239,50 @@ public class MyAchievementsModule : AchievementsModule
                 case "add_currency":
                     AddCurrency(user, command.CommandValues[0], int.Parse(command.CommandValues[1]));
                     break;
-                    
+
                 case "unlock_avatar":
                     UnlockAvatar(user, command.CommandValues[0]);
                     break;
-                
-                // Другие команды
+
+                // Other commands
                 default:
                     logger.Error($"Unknown achievement command: {command.CommandKey}");
                     break;
             }
         }
     }
-    
+
     private void AddCurrency(IUserPeerExtension user, string currencyType, int amount)
     {
-        // Добавление валюты игроку
+        // Add currency to the player
     }
-    
+
     private void UnlockAvatar(IUserPeerExtension user, string avatarId)
     {
-        // Разблокировка аватара игроку
+        // Unlock the avatar for the player
     }
 }
 ```
 
-## Клиентская обертка
+## Client wrapper
 
 ### AchievementsModuleClient:
 ```csharp
-// Пример использования
+// Usage example
 var client = Mst.Client.Modules.GetModule<AchievementsModuleClient>();
 
-// Получение списка достижений
+// Get the list of achievements
 var achievements = client.GetAchievements();
 
-// Отображение интерфейса
+// Display UI
 void ShowAchievementsUI()
 {
     foreach (var achievement in achievements)
     {
-        // Создать элемент интерфейса для достижения
+        // Create a UI element for the achievement
         var item = Instantiate(achievementItemPrefab, container);
-        
-        // Заполнить данными
+
+        // Fill with data
         item.SetTitle(achievement.Title);
         item.SetDescription(achievement.Description);
         item.SetIcon(achievement.Icon);
@@ -294,12 +292,12 @@ void ShowAchievementsUI()
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте уникальные ключи** для каждого достижения
-2. **Разделяйте одиночные и инкрементальные** достижения
-3. **Внедряйте проверку на стороне сервера** для предотвращения читерства
-4. **Выполняйте логику наград на сервере**
-5. **Кэшируйте данные достижений** на клиенте для быстрого доступа
-6. **Разблокируйте похожие достижения** автоматически (например, "Убить 10 монстров" автоматически разблокирует "Убить 5 монстров")
-7. **Собирайте аналитику** по достижениям для оценки геймплея
+1. **Use unique keys** for every achievement
+2. **Separate single and incremental** achievements
+3. **Validate on the server** to prevent cheating
+4. **Execute reward logic on the server**
+5. **Cache achievement data** on the client for quick access
+6. **Unlock related achievements** automatically (for example, "Kill 10 monsters" unlocks "Kill 5 monsters")
+7. **Gather analytics** on achievements to evaluate gameplay

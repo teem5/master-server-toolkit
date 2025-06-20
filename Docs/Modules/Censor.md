@@ -1,126 +1,124 @@
 # Master Server Toolkit - Censor
 
-## Описание
-Модуль цензуры для фильтрации нежелательного контента, такого как нецензурная лексика или оскорбления. Обеспечивает безопасную коммуникацию между игроками.
+## Description
+A censorship module for filtering unwanted content such as profanity or insults. Provides safe communication between players.
 
 ## CensorModule
 
-Основной класс модуля цензуры.
+Main class of the censorship module.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Settings")]
 [SerializeField] private TextAsset[] wordsLists;
 [SerializeField, TextArea(5, 10)] private string matchPattern = @"\b{0}\b";
 ```
 
-### Инициализация:
+### Initialization:
 ```csharp
-// Добавление модуля на сцену
+// Add the module to the scene
 var censorModule = gameObject.AddComponent<CensorModule>();
 
-// Настройка списков запрещенных слов
+// Configure forbidden word lists
 public TextAsset[] wordsLists;
 wordsLists = new TextAsset[] { forbiddenWordsAsset };
 ```
 
-### Формат файла словаря:
-Словарь представляет собой текстовый файл с запрещенными словами, разделенными запятыми:
+### Dictionary file format:
+The dictionary is a text file with forbidden words separated by commas:
 ```
 bad,words,list,here,separated,by,commas
 ```
 
-## Использование в коде
+## Usage in code
 
-### Проверка текста:
+### Checking text:
 ```csharp
-// Получение экземпляра модуля
+// Get the module instance
 var censorModule = Mst.Server.Modules.GetModule<CensorModule>();
 
-// Проверка текста на наличие запрещенных слов
+// Check text for forbidden words
 bool hasBadWord = censorModule.HasCensoredWord("Text to check");
 
 if (hasBadWord)
 {
-    // Текст содержит запрещенные слова
+    // The text contains forbidden words
     Debug.Log("Text contains censored words");
 }
 else
 {
-    // Текст безопасен
+    // The text is clean
     Debug.Log("Text is clean");
 }
 ```
 
-### Интеграция с чатом:
+### Chat integration:
 ```csharp
-// В обработчике сообщений чата
+// In the chat message handler
 void HandleChatMessage(string message, IPeer sender)
 {
     var censorModule = Mst.Server.Modules.GetModule<CensorModule>();
-    
+
     if (censorModule.HasCensoredWord(message))
     {
-        // Отклонить сообщение
+        // Reject the message
         sender.SendMessage(MstOpCodes.MessageRejected, "Message contains forbidden words");
         return;
     }
-    
-    // Отправить сообщение всем пользователям
+
+    // Send the message to all users
     BroadcastMessage(message);
 }
 ```
 
-### Проверка имени пользователя:
+### Checking player names:
 ```csharp
-// При регистрации в AuthModule
+// During registration in AuthModule
 protected override bool IsUsernameValid(string username)
 {
     if (!base.IsUsernameValid(username))
         return false;
-    
+
     var censorModule = Mst.Server.Modules.GetModule<CensorModule>();
-    
-    // Проверка имени на запрещенные слова
+
+    // Check the name for forbidden words
     if (censorModule.HasCensoredWord(username))
         return false;
-    
+
     return true;
 }
 ```
 
-## Настройка паттерна проверки
+## Match pattern configuration
 
-Параметр `matchPattern` определяет, как именно будут проверяться запрещенные слова:
-
+The `matchPattern` parameter determines how forbidden words are checked:
 ```csharp
-// По умолчанию: Целые слова (используя границы слов)
+// Default: whole words using word boundaries
 matchPattern = @"\b{0}\b";
 
-// Более строгая проверка: включая частичные совпадения
+// Stricter check: including partial matches
 matchPattern = @"{0}";
 
-// С разделителями: проверяет только слова, разделенные пробелами
+// With separators: checks only words separated by spaces
 matchPattern = @"(\s|^){0}(\s|$)";
 ```
 
-## Расширение модуля
+## Extending the module
 
-Вы можете расширить базовую функциональность, создав наследника CensorModule:
-
+You can extend the base functionality by creating a subclass of CensorModule:
 ```csharp
 public class EnhancedCensorModule : CensorModule
 {
     [SerializeField] private bool useRegexPatterns = false;
     [SerializeField] private TextAsset regexPatterns;
-    
+
     private List<Regex> patterns = new List<Regex>();
-    
+
     protected override void ParseTextFiles()
     {
         base.ParseTextFiles();
-        
-        // Загрузка дополнительных регулярных выражений
+
+        // Load additional regex patterns
         if (useRegexPatterns && regexPatterns != null)
         {
             var patternLines = regexPatterns.text.Split('\n');
@@ -133,74 +131,74 @@ public class EnhancedCensorModule : CensorModule
             }
         }
     }
-    
+
     public override bool HasCensoredWord(string text)
     {
-        // Проверка базовым методом
+        // Check with the base method
         if (base.HasCensoredWord(text))
             return true;
-        
-        // Проверка с помощью регулярных выражений
+
+        // Check using regex patterns
         foreach (var regex in patterns)
         {
             if (regex.IsMatch(text))
                 return true;
         }
-        
+
         return false;
     }
-    
-    // Дополнительный метод для получения замаскированного текста
+
+    // Additional method to get masked text
     public string GetCensoredText(string text, char maskChar = '*')
     {
         string result = text;
-        
-        // Замена запрещенных слов маской
+
+        // Replace forbidden words with a mask
         foreach (var word in censoredWords)
         {
             string pattern = string.Format(matchPattern, Regex.Escape(word));
             string replacement = new string(maskChar, word.Length);
             result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
         }
-        
+
         return result;
     }
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Регулярно обновляйте словари** запрещенных слов
-2. **Используйте границы слов** (`\b{0}\b`) для избежания ложных срабатываний
-3. **Интегрируйте с системой чата** для автоматической фильтрации сообщений
-4. **Добавляйте преобразование текста** перед проверкой для обхода простых попыток обмана (напр. "b@d w0rd")
-5. **Включайте многоязычную поддержку** для интернациональных проектов
-6. **Учитывайте контекст** при фильтрации - некоторые слова могут быть нормальными в одном контексте, но нежелательными в другом
-7. **Используйте локализованные словари** для разных регионов
+1. **Update forbidden word lists regularly**
+2. **Use word boundaries** (`\b{0}\b`) to avoid false positives
+3. **Integrate with the chat system** for automatic message filtering
+4. **Transform text before checking** to bypass simple tricks (e.g. `b@d w0rd`)
+5. **Include multi-language support** for international projects
+6. **Consider context** when filtering—some words may be acceptable in one case but not in another
+7. **Use localized dictionaries** for different regions
 
-## Примеры интеграции
+## Integration examples
 
-### Система автоматического предупреждения:
+### Automatic warning system:
 ```csharp
 public class ChatFilterSystem : MonoBehaviour
 {
     [SerializeField] private int maxViolations = 3;
     private Dictionary<string, int> violations = new Dictionary<string, int>();
-    
+
     public void CheckMessage(string username, string message)
     {
         var censorModule = Mst.Server.Modules.GetModule<CensorModule>();
-        
+
         if (censorModule.HasCensoredWord(message))
         {
             if (!violations.ContainsKey(username))
                 violations[username] = 0;
-                
+
             violations[username]++;
-            
+
             if (violations[username] >= maxViolations)
             {
-                // Временный бан пользователя
+                // Temporary ban the user
                 BanUser(username, TimeSpan.FromMinutes(10));
             }
         }
@@ -208,26 +206,26 @@ public class ChatFilterSystem : MonoBehaviour
 }
 ```
 
-### Интеграция с пользовательским контентом:
+### Integration with user-generated content:
 ```csharp
-// Проверка пользовательских названий
+// Validate user-provided names
 public bool ValidateUserContent(string text)
 {
     var censorModule = Mst.Server.Modules.GetModule<CensorModule>();
     return !censorModule.HasCensoredWord(text);
 }
 
-// Использование при создании предметов, кланов и т.д.
+// Use when creating items, clans, etc.
 public bool CreateClan(string clanName, string clanTag)
 {
     if (!ValidateUserContent(clanName) || !ValidateUserContent(clanTag))
     {
         return false;
     }
-    
-    // Создание клана
+
+    // Create the clan
     // ...
-    
+
     return true;
 }
 ```
