@@ -1,39 +1,39 @@
 # Master Server Toolkit - Keys
 
-## Описание
-Центральный реестр ключей и кодов для сетевых сообщений, событий и словарных данных. Обеспечивает типизированные константы для всех операций в фреймворке.
+## Description
+Central registry of keys and codes for network messages, events and dictionary data. Provides typed constants for all operations in the framework.
 
 ## MstOpCodes
 
-Операционные коды для сетевых сообщений между клиентом и сервером.
+Operation codes for network messages between client and server.
 
-### Базовые операции:
+### Basic operations:
 ```csharp
-// Ошибки и пинг
+// Errors and ping
 MstOpCodes.Error        // Сообщения об ошибках
 MstOpCodes.Ping         // Проверка связи
 
-// Аутентификация
+// Authentication
 MstOpCodes.SignIn       // Вход в аккаунт
 MstOpCodes.SignUp       // Регистрация
 MstOpCodes.SignOut      // Выход
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Отправка сообщения с определенным OpCode
+// Send a message with a specific OpCode
 client.SendMessage(MstOpCodes.SignIn, loginData);
 
-// Регистрация обработчика для OpCode
+// Register a handler for an OpCode
 client.RegisterMessageHandler(MstOpCodes.LobbyInfo, HandleLobbyInfo);
 
-// Создание кастомного OpCode
+// Create a custom OpCode
 public static ushort MyCustomCode = "myCustomAction".ToUint16Hash();
 ```
 
-### Категории OpCodes:
+### OpCode categories:
 
-#### 1. Аутентификация и аккаунты:
+#### 1. Authentication and accounts:
 ```csharp
 MstOpCodes.SignIn
 MstOpCodes.SignUp
@@ -61,7 +61,7 @@ MstOpCodes.SetLobbyProperties
 MstOpCodes.StartLobbyGame
 ```
 
-#### 4. Чат:
+#### 4. Chat:
 ```csharp
 MstOpCodes.ChatMessage
 MstOpCodes.JoinChannel
@@ -71,43 +71,43 @@ MstOpCodes.PickUsername
 
 ## MstEventKeys
 
-Ключи для системы событий, используемые для UI и игровой логики.
+Keys for the event system used by UI and game logic.
 
-### UI события:
+### UI events:
 ```csharp
-// Диалоги
+// Dialogs
 MstEventKeys.showOkDialogBox
 MstEventKeys.hideOkDialogBox
 MstEventKeys.showYesNoDialogBox
 
-// Экраны
+// Screens
 MstEventKeys.showSignInView
 MstEventKeys.hideSignInView
 MstEventKeys.showLobbyListView
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Показать диалог
+// Show a dialog
 Mst.Events.Invoke(MstEventKeys.showOkDialogBox, "Добро пожаловать!");
 
-// Подписка на событие
+// Subscribe to an event
 Mst.Events.AddListener(MstEventKeys.gameStarted, OnGameStarted);
 
-// Создание кастомных событий
+// Create custom events
 public static string MyCustomEvent = "game.levelCompleted";
 ```
 
-### Категории событий:
+### Event categories:
 
-#### 1. Навигация:
+#### 1. Navigation:
 ```csharp
 MstEventKeys.goToZone
 MstEventKeys.leaveRoom
 MstEventKeys.showLoadingInfo
 ```
 
-#### 2. Игровые события:
+#### 2. Game events:
 ```csharp
 MstEventKeys.gameStarted
 MstEventKeys.gameOver
@@ -115,7 +115,7 @@ MstEventKeys.playerStartedGame
 MstEventKeys.playerFinishedGame
 ```
 
-#### 3. Визуальные элементы:
+#### 3. Visual elements:
 ```csharp
 MstEventKeys.showLoadingInfo
 MstEventKeys.hideLoadingInfo
@@ -124,9 +124,9 @@ MstEventKeys.showPickUsernameView
 
 ## MstDictKeys
 
-Ключи для словарных данных, передаваемых в сообщениях.
+Keys for dictionary data passed in messages.
 
-### Пользовательские данные:
+### User data:
 ```csharp
 MstDictKeys.USER_ID          // "-userId"
 MstDictKeys.USER_NAME        // "-userName"
@@ -134,30 +134,30 @@ MstDictKeys.USER_EMAIL       // "-userEmail"
 MstDictKeys.USER_AUTH_TOKEN  // "-userAuthToken"
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Создание сообщения с данными
+// Create a message with data
 var userData = new MstProperties();
 userData.Set(MstDictKeys.USER_NAME, "Player1");
 userData.Set(MstDictKeys.USER_EMAIL, "player@game.com");
 
-// Отправка данных
+// Send data
 client.SendMessage(MstOpCodes.SignUp, userData);
 
-// Получение данных
+// Receive data
 string userName = message.AsString(MstDictKeys.USER_NAME);
 ```
 
-### Категории ключей:
+### Key categories:
 
-#### 1. Комнаты:
+#### 1. Rooms:
 ```csharp
 MstDictKeys.ROOM_ID
 MstDictKeys.ROOM_CONNECTION_TYPE
 MstDictKeys.WORLD_ZONE
 ```
 
-#### 2. Лобби:
+#### 2. Lobby:
 ```csharp
 MstDictKeys.LOBBY_FACTORY_ID
 MstDictKeys.LOBBY_NAME
@@ -165,7 +165,7 @@ MstDictKeys.LOBBY_PASSWORD
 MstDictKeys.LOBBY_TEAM
 ```
 
-#### 3. Аутентификация:
+#### 3. Authentication:
 ```csharp
 MstDictKeys.USER_ID
 MstDictKeys.USER_PASSWORD
@@ -175,32 +175,32 @@ MstDictKeys.RESET_PASSWORD_CODE
 
 ## MstPeerPropertyCodes
 
-Коды для свойств пиров (подключенных клиентов/серверов).
+Codes for peer properties (connected clients/servers).
 
 ```csharp
-// Базовые свойства
+// Basic properties
 MstPeerPropertyCodes.Start
 
-// Зарегистрированные сущности
+// Registered entities
 MstPeerPropertyCodes.RegisteredRooms
 MstPeerPropertyCodes.RegisteredSpawners
 
-// Клиентские запросы
+// Client requests
 MstPeerPropertyCodes.ClientSpawnRequest
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Установка свойства пира
+// Set a peer property
 peer.SetProperty(MstPeerPropertyCodes.RegisteredRooms, roomsList);
 
-// Получение свойства
+// Get a property
 var rooms = peer.GetProperty(MstPeerPropertyCodes.RegisteredRooms);
 ```
 
-## Создание собственных ключей
+## Creating custom keys
 
-### Расширение OpCodes:
+### Extending OpCodes:
 ```csharp
 public static class CustomOpCodes
 {
@@ -210,7 +210,7 @@ public static class CustomOpCodes
 }
 ```
 
-### Расширение EventKeys:
+### Extending EventKeys:
 ```csharp
 public static class GameEventKeys
 {
@@ -220,7 +220,7 @@ public static class GameEventKeys
 }
 ```
 
-### Расширение DictKeys:
+### Extending DictKeys:
 ```csharp
 public static class CustomDictKeys
 {
@@ -230,70 +230,70 @@ public static class CustomDictKeys
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте хеширование для OpCodes**:
+1. **Use hashing for OpCodes**:
 ```csharp
-// Хорошо
+// Good
 public static ushort MyAction = "myAction".ToUint16Hash();
 
-// Плохо - прямые числа
+// Bad - direct numbers
 public static ushort MyAction = 1234;
 ```
 
-2. **Делайте ключи описательными**:
+2. **Make keys descriptive**:
 ```csharp
-// Хорошо
+// Good
 MstDictKeys.USER_AUTH_TOKEN
 
-// Плохо
+// Bad
 "-token"
 ```
 
-3. **Группируйте по функциональности**:
+3. **Group by functionality**:
 ```csharp
-// Группировка по модулям
+// Grouping by modules
 public struct ChatOpCodes { }
 public struct LobbyOpCodes { }
 public struct AuthOpCodes { }
 ```
 
-4. **Документируйте кастомные ключи**:
+4. **Document custom keys**:
 ```csharp
 /// <summary>
-/// Получает статистику игрока за текущий сезон
+/// Gets player statistics for the current season
 /// </summary>
 public static ushort GetSeasonStats = "getSeasonStats".ToUint16Hash();
 ```
 
-## Интеграция с другими системами
+## Integration with other systems
 
 ```csharp
-// Создание сообщения с несколькими ключами
+// Create a message with multiple keys
 var message = new MstProperties();
 message.Set(MstDictKeys.USER_ID, userId);
 message.Set(MstDictKeys.ROOM_ID, roomId);
 message.Set(CustomDictKeys.PLAYER_LEVEL, level);
 
-// Отправка через сеть
+// Send over the network
 Mst.Server.SendMessage(peer, CustomOpCodes.UpdatePlayerData, message);
 
-// Обработка с использованием событий
+// Handle using events
 Mst.Events.AddListener(GameEventKeys.itemCrafted, (msg) => {
     var itemData = msg.As<CraftedItem>();
     // Обработка
 });
 ```
 
-## Отладка и мониторинг
+## Debugging and monitoring
 
 ```csharp
-// Логирование всех входящих OpCodes
+// Log all incoming OpCodes
 Connection.OnMessageReceived += (msg) => {
     Debug.Log($"Received OpCode: {msg.OpCode} ({GetOpCodeName(msg.OpCode)})");
 };
 
-// Метод для получения имени OpCode
+// Method to get the OpCode name
 private string GetOpCodeName(ushort opCode)
 {
     var fields = typeof(MstOpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);

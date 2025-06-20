@@ -1,38 +1,38 @@
 # Master Server Toolkit - Logger
 
-## Описание
-Гибкая система логирования с поддержкой уровней, именованных логгеров и настраиваемых выводов.
+## Description
+Flexible logging system with support for levels, named loggers and configurable outputs.
 
 ## Logger
 
-Основной класс для логирования сообщений.
+Main class for logging messages.
 
-### Создание логгера:
+### Creating a logger:
 ```csharp
-// Создание именованного логгера
+// Create a named logger
 Logger logger = Mst.Create.Logger("MyModule");
 logger.LogLevel = LogLevel.Info;
 
-// Получение логгера через LogManager
+// Get a logger via LogManager
 Logger networkLogger = LogManager.GetLogger("Network");
 ```
 
-### Уровни логирования:
+### Log levels:
 ```csharp
-LogLevel.All      // Все сообщения
-LogLevel.Trace    // Детальное трассирование
-LogLevel.Debug    // Отладочная информация
-LogLevel.Info     // Информационные сообщения
-LogLevel.Warn     // Предупреждения
-LogLevel.Error    // Ошибки
-LogLevel.Fatal    // Критические ошибки
-LogLevel.Off      // Отключить логирование
-LogLevel.Global   // Использовать глобальный уровень
+LogLevel.All      // All messages
+LogLevel.Trace    // Detailed trace
+LogLevel.Debug    // Debug information
+LogLevel.Info     // Informational messages
+LogLevel.Warn     // Warnings
+LogLevel.Error    // Errors
+LogLevel.Fatal    // Critical errors
+LogLevel.Off      // Disable logging
+LogLevel.Global   // Use global level
 ```
 
-### Методы логирования:
+### Logging methods:
 ```csharp
-// Базовые методы
+// Basic methods
 logger.Trace("Entering method GetPlayer()");
 logger.Debug("Player position: {0}", playerPos);
 logger.Info("Player connected successfully");
@@ -40,24 +40,24 @@ logger.Warn("Connection latency is high");
 logger.Error("Failed to load game data");
 logger.Fatal("Critical server error");
 
-// Условное логирование
+// Conditional logging
 logger.Debug(player != null, "Player found: " + player.Name);
 logger.Log(LogLevel.Info, "Custom message");
 ```
 
 ## LogManager
 
-Центральный менеджер для всех логгеров.
+Central manager for all loggers.
 
-### Инициализация:
+### Initialization:
 ```csharp
-// Базовая инициализация
+// Basic initialization
 LogManager.Initialize(
     new[] { LogAppenders.UnityConsoleAppender },
     LogLevel.Info
 );
 
-// Инициализация с кастомными аппендерами
+// Initialization with custom appenders
 LogManager.Initialize(new LogHandler[] {
     LogAppenders.UnityConsoleAppender,
     CustomFileAppender,
@@ -65,32 +65,32 @@ LogManager.Initialize(new LogHandler[] {
 }, LogLevel.Debug);
 ```
 
-### Глобальные настройки:
+### Global settings:
 ```csharp
-// Глобальный уровень (для всех логгеров)
+// Global level (for all loggers)
 LogManager.GlobalLogLevel = LogLevel.Warn;
 
-// Принудительный уровень (переопределяет все)
+// Forced level (overrides everything)
 LogManager.LogLevel = LogLevel.Off;
 ```
 
 ## Logs
 
-Статический класс для быстрого логирования без создания логгера.
+Static class for quick logging without creating a logger.
 
 ```csharp
-// Использование статических методов
+// Using static methods
 Logs.Info("Server started");
 Logs.Error("Connection failed");
 Logs.Debug("Processing player data");
 
-// Условное логирование
+// Conditional logging
 Logs.Warn(healthPoints < 10, "Player health is critical");
 ```
 
-## Кастомные аппендеры
+## Custom appenders
 
-### Создание файлового аппендера:
+### Creating a file appender:
 ```csharp
 public static void FileAppender(Logger logger, LogLevel logLevel, object message)
 {
@@ -100,13 +100,13 @@ public static void FileAppender(Logger logger, LogLevel logLevel, object message
     File.AppendAllText(logPath, logEntry);
 }
 
-// Регистрация аппендера
+// Register the appender
 LogManager.AddAppender(FileAppender);
 ```
 
-## Примеры использования
+## Usage examples
 
-### Модульное логирование:
+### Module logging:
 ```csharp
 public class NetworkManager : MonoBehaviour
 {
@@ -125,7 +125,7 @@ public class NetworkManager : MonoBehaviour
         try
         {
             logger.Debug("Creating socket...");
-            // Код подключения
+            // Connection code
             
             logger.Info("Successfully connected to server");
         }
@@ -138,26 +138,26 @@ public class NetworkManager : MonoBehaviour
 }
 ```
 
-## Настройка через аргументы
+## Configuration via arguments
 
 ```csharp
-// При запуске приложения
+// On application start
 void ConfigureLogging()
 {
-    // Получение уровня из аргументов
+    // Get level from arguments
     string logLevelArg = Mst.Args.AsString(Mst.Args.Names.LogLevel, "Info");
     LogLevel level = (LogLevel)Enum.Parse(typeof(LogLevel), logLevelArg);
     
     LogManager.GlobalLogLevel = level;
     
-    // Настройка вывода в файл (если указано)
+    // Configure file output (if specified)
     if (Mst.Args.AsBool(Mst.Args.Names.EnableFileLog, false))
     {
         LogManager.AddAppender(FileAppender);
     }
 }
 
-// Пример запуска
+// Launch example
 // ./Game.exe -logLevel Debug -enableFileLog true
 ```
 

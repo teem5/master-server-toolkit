@@ -1,13 +1,13 @@
 # Master Server Toolkit - Server
 
-## Описание
-Базовая инфраструктура для создания серверных приложений. Включает ServerBehaviour для сетевого сервера и BaseServerModule для модулей.
+## Description
+Basic infrastructure for creating server applications. Includes ServerBehaviour for the network server and BaseServerModule for modules.
 
 ## ServerBehaviour
 
-Базовый класс для создания серверных приложений с автоматическим управлением подключениями и модулями.
+Base class for creating server applications with automatic connection and module management.
 
-### Основные свойства:
+### Main properties:
 ```csharp
 [Header("Server Settings")]
 public string serverIp = "localhost";
@@ -20,44 +20,44 @@ public bool useSecure = false;
 public string password = "mst";
 ```
 
-### Управление сервером:
+### Server management:
 ```csharp
-// Запуск сервера
+// Start server
 server.StartServer();
 server.StartServer(8080);
 server.StartServer("192.168.1.100", 8080);
 
-// Остановка сервера
+// Stop server
 server.StopServer();
 
-// Проверка статуса
+// Check status
 bool isRunning = server.IsRunning;
 int connectedClients = server.PeersCount;
 ```
 
-### События сервера:
+### Server events:
 ```csharp
-// Подключение клиента
+// Client connection
 server.OnPeerConnectedEvent += (peer) => {
     Debug.Log($"Client {peer.Id} connected");
 };
 
-// Отключение клиента
+// Client disconnection
 server.OnPeerDisconnectedEvent += (peer) => {
     Debug.Log($"Client {peer.Id} disconnected");
 };
 
-// Старт/остановка сервера
+// Server start/stop
 server.OnServerStartedEvent += () => Debug.Log("Server started");
 server.OnServerStoppedEvent += () => Debug.Log("Server stopped");
 ```
 
-### Регистрация обработчиков:
+### Registering handlers:
 ```csharp
-// Регистрация обработчика сообщений
+// Register a message handler
 server.RegisterMessageHandler(MstOpCodes.SignIn, HandleSignIn);
 
-// Асинхронный обработчик
+// Asynchronous handler
 server.RegisterMessageHandler(CustomOpCodes.GetData, async (message) => {
     var data = await LoadDataAsync();
     message.Respond(data, ResponseStatus.Success);
@@ -66,16 +66,16 @@ server.RegisterMessageHandler(CustomOpCodes.GetData, async (message) => {
 
 ## BaseServerModule
 
-Базовый класс для создания модульных компонентов сервера.
+Base class for creating modular server components.
 
-### Создание модуля:
+### Creating a module:
 ```csharp
 public class AccountsModule : BaseServerModule
 {
     protected override void Awake()
     {
         base.Awake();
-        // Добавление зависимостей
+        // Add dependencies
         AddDependency<DatabaseModule>();
         AddOptionalDependency<EmailModule>();
     }
@@ -89,42 +89,42 @@ public class AccountsModule : BaseServerModule
     
     private void HandleSignIn(IIncomingMessage message)
     {
-        // Логика входа
+        // Sign-in logic
     }
 }
 ```
 
-### Зависимости модулей:
+### Module dependencies:
 ```csharp
-// Обязательные зависимости
+// Required dependencies
 AddDependency<DatabaseModule>();
 AddDependency<PermissionsModule>();
 
-// Опциональные зависимости
+// Optional dependencies
 AddOptionalDependency<EmailModule>();
 AddOptionalDependency<AnalyticsModule>();
 
-// Получение других модулей
+// Get other modules
 var dbModule = Server.GetModule<DatabaseModule>();
 var emailModule = Server.GetModule<EmailModule>();
 ```
 
-## Расширенные возможности
+## Advanced features
 
-### Кастомный ServerBehaviour:
+### Custom ServerBehaviour:
 ```csharp
 public class GameServerBehaviour : ServerBehaviour
 {
     protected override void OnPeerConnected(IPeer peer)
     {
         base.OnPeerConnected(peer);
-        // Кастомная логика для нового игрока
+        // Custom logic for a new player
         NotifyOtherPlayers(peer);
     }
     
     protected override void ValidateConnection(ProvideServerAccessCheckPacket packet, SuccessCallback callback)
     {
-        // Кастомная валидация подключения
+        // Custom connection validation
         if (CheckServerPassword(packet.Password) && CheckGameVersion(packet.Version))
         {
             callback.Invoke(true, string.Empty);
@@ -137,64 +137,64 @@ public class GameServerBehaviour : ServerBehaviour
 }
 ```
 
-### Статистика и мониторинг:
+### Statistics and monitoring:
 ```csharp
-// Получение информации о сервере
+// Get server information
 MstProperties info = server.Info();
 MstJson jsonInfo = server.JsonInfo();
 
-// Статистика подключений
+// Connection statistics
 Debug.Log($"Active clients: {server.PeersCount}");
 Debug.Log($"Total clients: {server.Info().Get("Total clients")}");
 Debug.Log($"Highest clients: {server.Info().Get("Highest clients")}");
 ```
 
-## Аргументы командной строки
+## Command line arguments
 
 ```bash
-# Основные параметры
+# Basic parameters
 ./Server.exe -masterip 192.168.1.100 -masterport 5000
 
-# Безопасность
+# Security
 ./Server.exe -mstUseSecure true -certificatePath cert.pfx -certificatePassword pass
 
-# Производительность
+# Performance
 ./Server.exe -targetFrameRate 60 -clientInactivityTimeout 30
 ```
 
-### Автоматическая настройка из аргументов:
+### Automatic setup from arguments:
 ```csharp
-// Адрес и порт
+// Address and port
 serverIp = Mst.Args.AsString(Mst.Args.Names.MasterIp, serverIp);
 serverPort = Mst.Args.AsInt(Mst.Args.Names.MasterPort, serverPort);
 
-// Безопасность
+// Security
 useSecure = Mst.Args.AsBool(Mst.Args.Names.UseSecure, useSecure);
 certificatePath = Mst.Args.AsString(Mst.Args.Names.CertificatePath, certificatePath);
 
-// Таймауты
+// Timeouts
 inactivityTimeout = Mst.Args.AsFloat(Mst.Args.Names.ClientInactivityTimeout, inactivityTimeout);
 ```
 
-## Работа с подключениями
+## Working with connections
 
-### Управление пирами:
+### Peer management:
 ```csharp
-// Получение пира по ID
+// Get peer by ID
 IPeer peer = server.GetPeer(peerId);
 
-// Отключение всех клиентов
+// Disconnect all clients
 foreach (var peer in connectedPeers.Values)
 {
     peer.Disconnect("Server maintenance");
 }
 
-// Проверка подлинности
+// Authentication check
 var securityInfo = peer.GetExtension<SecurityInfoPeerExtension>();
 int permissionLevel = securityInfo.PermissionLevel;
 ```
 
-### Права доступа:
+### Permissions:
 ```csharp
 [SerializeField]
 private List<PermissionEntry> permissions = new List<PermissionEntry>
@@ -203,26 +203,26 @@ private List<PermissionEntry> permissions = new List<PermissionEntry>
     new PermissionEntry { key = "moderator", permissionLevel = 50 }
 };
 
-// Проверка прав
+// Permission check
 if (peer.HasPermission(50))
 {
-    // Разрешено для модераторов и выше
+    // Allowed for moderators and above
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте модули для логической группировки**:
-   - AuthModule - аутентификация
-   - GameModule - игровая логика
-   - ChatModule - чат
-   - DatabaseModule - работа с БД
+1. **Use modules for logical grouping**:
+   - AuthModule - authentication
+   - GameModule - game logic
+   - ChatModule - chat
+   - DatabaseModule - database operations
 
-2. **Управляйте зависимостями**:
-   - Объявляйте зависимости в Awake()
-   - Используйте опциональные зависимости для дополнительных функций
+2. **Manage dependencies**:
+   - Declare dependencies in Awake()
+   - Use optional dependencies for additional features
 
-3. **Обрабатывайте ошибки**:
+3. **Handle errors**:
 ```csharp
 protected override void OnMessageReceived(IIncomingMessage message)
 {
@@ -238,12 +238,12 @@ protected override void OnMessageReceived(IIncomingMessage message)
 }
 ```
 
-4. **Оптимизируйте производительность**:
-   - Ограничивайте FPS сервера
-   - Настраивайте таймауты
-   - Используйте максимальное количество подключений
+4. **Optimize performance**:
+   - Limit server FPS
+   - Adjust timeouts
+   - Use the maximum number of connections
 
-5. **Логируйте важные события**:
+5. **Log important events**:
 ```csharp
 logger.Info($"Server started on {Address}:{Port}");
 logger.Debug($"Module {GetType().Name} initialized");

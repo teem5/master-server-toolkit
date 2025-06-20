@@ -1,31 +1,31 @@
 # Master Server Toolkit - Client
 
-## Описание
-Система клиентов для подключения к Master Server. Состоит из базовых классов и помощников подключения.
+## Description
+A client system for connecting to the Master Server. It consists of basic classes and connection helpers.
 
 ## BaseClientBehaviour
 
-Базовый класс для создания клиентских компонентов.
+Base class for creating client components.
 
-### Основные свойства:
+### Main properties:
 ```csharp
-// Текущее подключение
+// Current connection
 public IClientSocket Connection { get; protected set; }
 
-// Проверка подключения
+// Check connection
 public bool IsConnected => Connection != null && Connection.IsConnected;
 
-// Логгер модуля
+// Module logger
 public Logger Logger { get; set; }
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
 public class MyClientModule : BaseClientBehaviour
 {
     protected override void OnInitialize()
     {
-        // Инициализация при запуске
+        // Initialization on start
         Logger.Info("Module started");
     }
     
@@ -38,20 +38,20 @@ public class MyClientModule : BaseClientBehaviour
 
 ### Основные методы:
 ```csharp
-// Регистрация обработчика сообщений
+// Register a message handler
 RegisterMessageHandler(IPacketHandler handler);
 RegisterMessageHandler(ushort opCode, IncommingMessageHandler handler);
 
-// Изменение подключения
+// Change connection
 ChangeConnection(IClientSocket connection, bool clearHandlers = false);
 
-// Очистка подключения
+// Clear connection
 ClearConnection(bool clearHandlers = true);
 ```
 
 ## BaseClientModule
 
-Базовый класс для клиентских модулей.
+Base class for client modules.
 
 ### Пример:
 ```csharp
@@ -61,27 +61,27 @@ public class GameStatisticsModule : BaseClientModule
     {
         base.OnInitialize(parentBehaviour);
         
-        // Регистрация обработчиков
+        // Register handlers
         parentBehaviour.RegisterMessageHandler(OpCodes.Statistics, HandleStatistics);
     }
     
     private void HandleStatistics(IIncommingMessage message)
     {
-        // Обработка статистики
+        // Handle statistics
     }
 }
 ```
 
 ## ClientToMasterConnector
 
-Компонент для автоматического подключения к Master Server.
+Component for automatic connection to the Master Server.
 
-### Настройка:
+### Setup:
 ```csharp
-// Добавить на GameObject
+// Add to a GameObject
 var connector = GetComponent<ClientToMasterConnector>();
 
-// Настройка через Inspector или код
+// Configure via Inspector or code
 connector.serverIp = "192.168.1.100";
 connector.serverPort = 5000;
 connector.connectOnStart = true;
@@ -89,67 +89,67 @@ connector.connectOnStart = true;
 
 ### Аргументы командной строки:
 ```bash
-# Автоматическая настройка IP и порта
+# Automatic IP and port configuration
 ./Client.exe -masterip 192.168.1.100 -masterport 5000
 ```
 
 ## ConnectionHelper
 
-Базовый помощник для создания подключений с автоматическими попытками.
+Base helper for creating connections with automatic attempts.
 
-### Основные настройки:
+### Main settings:
 ```csharp
-// Количество попыток подключения
+// Number of connection attempts
 [SerializeField] protected int maxAttemptsToConnect = 5;
 
-// Тайм-аут подключения
+// Connection timeout
 [SerializeField] protected float timeout = 5f;
 
-// Автоматическое подключение
+// Auto connect
 [SerializeField] protected bool connectOnStart = true;
 
-// Безопасное подключение
+// Secure connection
 [SerializeField] protected bool useSecure = false;
 ```
 
-### События:
+### Events:
 ```csharp
-// Успешное подключение
+// Successful connection
 OnConnectedEvent
 
-// Неудачное подключение
+// Failed connection
 OnFailedConnectEvent
 
-// Отключение
+// Disconnection
 OnDisconnectedEvent
 ```
 
-### Пример кастомного коннектора:
+### Example of a custom connector:
 ```csharp
 public class MyCustomConnector : ConnectionHelper<MyCustomConnector>
 {
     protected override void Start()
     {
-        // Кастомная логика перед подключением
+        // Custom logic before connecting
         base.Start();
     }
     
     protected override void OnConnectedEventHandler(IClientSocket client)
     {
         base.OnConnectedEventHandler(client);
-        // Дополнительная логика после подключения
+        // Additional logic after connection
     }
 }
 ```
 
-## Архитектура модулей
+## Module architecture
 
-### Иерархия модулей:
-1. BaseClientBehaviour - основной компонент
-2. BaseClientModule - дочерние модули
-3. Автоматическая инициализация модулей при запуске
+### Module hierarchy:
+1. BaseClientBehaviour - main component
+2. BaseClientModule - child modules
+3. Modules are initialized automatically on start
 
-### Пример структуры:
+### Example structure:
 ```
 GameObject
 ├── MyClientBehaviour (BaseClientBehaviour)
@@ -159,9 +159,9 @@ GameObject
     └── ProfileModule (BaseClientModule)
 ```
 
-## Лучшие практики
-1. Используйте ConnectionHelper для управления подключением
-2. Наследуйтесь от BaseClientBehaviour для основных компонентов
-3. Создавайте специализированные модули через BaseClientModule
-4. Регистрируйте обработчики в OnInitialize
-5. Очищайте ресурсы в OnDestroy
+## Best practices
+1. Use ConnectionHelper to manage the connection
+2. Inherit from BaseClientBehaviour for main components
+3. Create specialized modules via BaseClientModule
+4. Register handlers in OnInitialize
+5. Clean up resources in OnDestroy

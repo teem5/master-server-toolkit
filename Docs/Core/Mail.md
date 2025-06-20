@@ -1,13 +1,13 @@
 # Master Server Toolkit - Mail
 
-## Описание
-Система отправки электронной почты через SMTP протокол с поддержкой HTML шаблонов.
+## Description
+Email sending system via SMTP protocol with HTML template support.
 
 ## SmtpMailer
 
-Основной класс для отправки почты через SMTP.
+Main class for sending mail via SMTP.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("E-mail settings")]
 public string smtpHost = "smtp.gmail.com";
@@ -22,39 +22,39 @@ public string senderDisplayName = "Your Game Name";
 [SerializeField] protected TextAsset emailBodyTemplate;
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
 var mailer = GetComponent<SmtpMailer>();
 
-// Отправка простого письма
+// Send a simple email
 await mailer.SendMailAsync("player@example.com", "Welcome!", "Thank you!");
 
-// С HTML шаблоном
+// With an HTML template
 await mailer.SendMailAsync(email, "Code: " + code, emailBody);
 ```
 
-## Шаблоны писем
+## Mail templates
 
-### HTML шаблон:
+### HTML template:
 ```html
 <h1>#{MESSAGE_SUBJECT}</h1>
 <div>#{MESSAGE_BODY}</div>
 <footer>© #{MESSAGE_YEAR} Game Name</footer>
 ```
 
-### Токены замены:
-- `#{MESSAGE_SUBJECT}` - Заголовок
-- `#{MESSAGE_BODY}` - Тело письма
-- `#{MESSAGE_YEAR}` - Текущий год
+### Replacement tokens:
+- `#{MESSAGE_SUBJECT}` - Subject
+- `#{MESSAGE_BODY}` - Body text
+- `#{MESSAGE_YEAR}` - Current year
 
-## Настройка SMTP провайдеров
+## SMTP provider setup
 
 ### Gmail:
 ```csharp
 smtpHost = "smtp.gmail.com";
 smtpPort = 587;
 enableSsl = true;
-// Используйте App Password
+// Use an App Password
 ```
 
 ### SendGrid:
@@ -65,9 +65,9 @@ smtpUsername = "apikey";
 smtpPassword = "your-sendgrid-api-key";
 ```
 
-## Интеграция примеры
+## Integration examples
 
-### Подтверждение email:
+### Email confirmation:
 ```csharp
 public async Task<bool> SendConfirmationCode(string email, string code)
 {
@@ -78,7 +78,7 @@ public async Task<bool> SendConfirmationCode(string email, string code)
 }
 ```
 
-### Сброс пароля:
+### Password reset:
 ```csharp
 public async Task<bool> SendPasswordReset(string email, string resetLink)
 {
@@ -89,30 +89,30 @@ public async Task<bool> SendPasswordReset(string email, string resetLink)
 }
 ```
 
-## Настройка через аргументы
+## Configuration via command line arguments
 
 ```bash
-# При запуске
+# At launch
 ./Server.exe -smtpHost smtp.gmail.com -smtpUsername game@gmail.com -smtpPassword app-password
 ```
 
-## Аргументы проверяются автоматически:
+## Arguments are parsed automatically:
 ```csharp
 smtpHost = Mst.Args.AsString(Mst.Args.Names.SmtpHost, smtpHost);
 smtpUsername = Mst.Args.AsString(Mst.Args.Names.SmtpUsername, smtpUsername);
 smtpPassword = Mst.Args.AsString(Mst.Args.Names.SmtpPassword, smtpPassword);
 ```
 
-## Важные замечания
-- Не работает в WebGL
-- Ошибки логируются асинхронно
-- Используйте App Password для Gmail
-- Проверяйте настройки брандмауэра
-- HTML шаблоны загружаются из Resources
+## Important notes
+- Does not work in WebGL
+- Errors are logged asynchronously
+- Use an App Password for Gmail
+- Check firewall settings
+- HTML templates are loaded from Resources
 
-## Лучшие практики
-1. Храните SMTP пароли в безопасном месте
-2. Используйте асинхронные вызовы
-3. Проверяйте email на валидность
-4. Внедряйте ограничения на отправку
-5. Тестируйте с разными провайдерами
+## Best practices
+1. Store SMTP passwords securely
+2. Use asynchronous calls
+3. Validate email addresses
+4. Implement sending limits
+5. Test with different providers

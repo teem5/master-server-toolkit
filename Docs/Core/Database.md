@@ -1,11 +1,11 @@
 # Master Server Toolkit - Database
 
-## Описание
-Система доступа к базам данных и API. Предоставляет абстракцию для работы с различными типами хранилищ данных.
+## Description
+A system for accessing databases and APIs. Provides an abstraction for working with different types of data stores.
 
 ## IDatabaseAccessor
 
-Базовый интерфейс для всех аксессоров базы данных.
+Base interface for all database accessors.
 
 ```csharp
 public interface IDatabaseAccessor : IDisposable
@@ -15,63 +15,63 @@ public interface IDatabaseAccessor : IDisposable
 }
 ```
 
-### Реализация собственного аксессора:
+### Implementing your own accessor:
 ```csharp
 public class MySQLAccessor : IDatabaseAccessor
 {
     public MstProperties CustomProperties { get; } = new MstProperties();
     public Logger Logger { get; set; }
     
-    // Реализация методов работы с MySQL
+    // Implementation of MySQL methods
     public async Task<User> GetUserById(string userId)
     {
-        // Логика получения пользователя
+        // Logic to get a user
     }
     
     public void Dispose()
     {
-        // Освобождение ресурсов
+        // Release resources
     }
 }
 ```
 
 ## MstDbAccessor
 
-Менеджер для работы с различными аксессорами базы данных.
+Manager for working with different database accessors.
 
-### Основные методы:
+### Main methods:
 ```csharp
-// Добавление аксессора
+// Add an accessor
 AddAccessor(IDatabaseAccessor access);
 
-// Получение аксессора по типу
+// Get accessor by type
 T GetAccessor<T>() where T : class, IDatabaseAccessor;
 ```
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Создание центрального менеджера БД
+// Create a central DB manager
 var dbManager = new MstDbAccessor();
 
-// Добавление различных аксессоров
+// Add various accessors
 dbManager.AddAccessor(new MongoDbAccessor());
 dbManager.AddAccessor(new RedisAccessor());
 dbManager.AddAccessor(new MySQLAccessor());
 
-// Получение нужного аксессора
+// Get required accessor
 var mongoDb = dbManager.GetAccessor<MongoDbAccessor>();
 var redis = dbManager.GetAccessor<RedisAccessor>();
 
-// Использование аксессора
+// Use accessor
 var user = await mongoDb.GetUserById("user123");
 await redis.SetCache("key", data, TimeSpan.FromMinutes(30));
 ```
 
 ## DatabaseAccessorFactory
 
-Абстрактная фабрика для создания аксессоров базы данных.
+Abstract factory for creating database accessors.
 
-### Пример реализации:
+### Example implementation:
 ```csharp
 public class GameDatabaseFactory : DatabaseAccessorFactory
 {
@@ -107,15 +107,15 @@ public class GameDatabaseFactory : DatabaseAccessorFactory
 }
 ```
 
-### Настройка через Inspector:
-1. Создать GameObject
-2. Добавить компонент наследника DatabaseAccessorFactory
-3. Настроить строку подключения и тип БД
-4. Аксессоры будут созданы автоматически при запуске
+### Setup via Inspector:
+1. Create a GameObject
+2. Add a component that inherits from DatabaseAccessorFactory
+3. Configure connection string and DB type
+4. Accessors will be created automatically at start
 
-## Примеры аксессоров
+## Accessor examples
 
-### Redis аксессор:
+### Redis accessor:
 ```csharp
 public class RedisAccessor : IDatabaseAccessor
 {
@@ -148,7 +148,7 @@ public class RedisAccessor : IDatabaseAccessor
 }
 ```
 
-### MongoDB аксессор:
+### MongoDB accessor:
 ```csharp
 public class MongoDbAccessor : IDatabaseAccessor
 {
@@ -177,15 +177,15 @@ public class MongoDbAccessor : IDatabaseAccessor
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Один аксессор - одна ответственность**: Каждый аксессор должен работать с одним типом хранилища
-2. **Используйте фабрику**: Создавайте аксессоры через DatabaseAccessorFactory
-3. **Логгирование**: Всегда устанавливайте Logger для аксессоров
-4. **Освобождение ресурсов**: Реализуйте Dispose правильно
-5. **Асинхронность**: Используйте async/await для операций с БД
+1. **One accessor - one responsibility**: each accessor should work with a single storage type
+2. **Use a factory**: create accessors through DatabaseAccessorFactory
+3. **Logging**: always set a Logger for your accessors
+4. **Resource cleanup**: implement Dispose properly
+5. **Asynchronous operations**: use async/await for database calls
 
-## Структура для масштабирования
+## Structure for scaling
 
 ```
 DatabaseAccessors/

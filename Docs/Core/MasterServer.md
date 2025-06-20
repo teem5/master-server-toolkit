@@ -1,88 +1,88 @@
-# Master Server Toolkit - Ядро
+# Master Server Toolkit - Core
 
-## Описание
-Master Server Toolkit (версия 4.20.0) - это система для создания выделенных серверов и мультиплеерных игр. Ядро состоит из двух основных компонентов: класса `Mst` и `MasterServerBehaviour`.
+## Description
+Master Server Toolkit (version 4.20.0) is a framework for creating dedicated servers and multiplayer games. The core consists of two main components: the `Mst` class and `MasterServerBehaviour`.
 
-## Класс Mst
-Центральный класс фреймворка, предоставляющий доступ ко всем основным системам.
+## Mst class
+Central class of the framework providing access to all major systems.
 
-### Основные свойства:
+### Main properties:
 ```csharp
-// Версия и название фреймворка
+// Framework version and name
 Mst.Version     // "4.20.0"
 Mst.Name        // "Master Server Toolkit"
 
-// Основное подключение к master серверу  
+// Main connection to the master server
 Mst.Connection  // IClientSocket
 
-// Расширенные настройки фреймворка
+// Advanced framework settings
 Mst.Settings    // MstAdvancedSettings
 ```
 
-### Основные компоненты:
+### Main components:
 ```csharp
-// Клиентские методы
+// Client methods
 Mst.Client      // MstClient - для игровых клиентов
 Mst.Server      // MstServer - для игровых серверов
 
-// Утилиты и хелперы
+// Utilities and helpers
 Mst.Helper      // Вспомогательные методы
 Mst.Security    // Безопасность и шифрование
 Mst.Create      // Создание сокетов и сообщений
 Mst.Concurrency // Работа с потоками
 
-// Системы
+// Systems
 Mst.Events      // Канал событий
 Mst.Runtime     // Работа с данными времени выполнения
 Mst.Args        // Аргументы командной строки
 ```
 
-## Класс MasterServerBehaviour
+## MasterServerBehaviour class
 
-Синглтон для управления работой master сервера в Unity.
+Singleton for managing the master server in Unity.
 
-### Пример использования:
+### Usage example:
 ```csharp
-// Получение экземпляра
+// Get instance
 var masterServer = MasterServerBehaviour.Instance;
 
-// События
+// Events
 MasterServerBehaviour.OnMasterStartedEvent += (server) => {
-    Debug.Log("Master Server запущен!");
+    Debug.Log("Master Server started!");
 };
 
 MasterServerBehaviour.OnMasterStoppedEvent += (server) => {
-    Debug.Log("Master Server остановлен!");
+    Debug.Log("Master Server stopped!");
 };
 ```
 
-### Ключевые особенности:
-- Автоматический запуск при старте сцены
-- Singleton pattern для единственного экземпляра
-- Поддержка аргументов командной строки для IP и порта
-- События для отслеживания состояния сервера
+### Key features:
+- Automatic launch when the scene starts
+- Singleton pattern for a single instance
+- Command line arguments for IP and port
+- Events for tracking server state
 
-### Аргументы командной строки:
+### Command line arguments:
 ```csharp
-// IP адрес master сервера
+// Master server IP address
 Mst.Args.AsString(Mst.Args.Names.MasterIp, defaultIP);
 
-// Порт master сервера  
+// Master server port
 Mst.Args.AsInt(Mst.Args.Names.MasterPort, defaultPort);
 ```
 
-## Быстрый старт
+## Quick start
 
-1. Добавить MasterServerBehaviour на сцену
-2. Настроить IP и порт
-3. Запустить сцену или установить аргументы командной строки
+1. Add MasterServerBehaviour to a scene
+2. Configure IP and port
+3. Run the scene or provide command line arguments
 
 ```bash
-# Пример запуска с аргументами
+# Example launch with arguments
 ./MyGameServer.exe -masterip 127.0.0.1 -masterport 5000
 ```
 
-## Важные замечания
-- Каждый master сервер использует единственный экземпляр MasterServerBehaviour
-- Все компоненты инициализируются автоматически при первом использовании Mst класса
-- События OnMasterStarted/Stopped должны быть подписаны до запуска сервера
+## Important notes
+- Each master server uses a single MasterServerBehaviour instance
+- All components are initialized automatically when the Mst class is first used
+- OnMasterStarted/Stopped events must be subscribed before the server starts
