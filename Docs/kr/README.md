@@ -26,10 +26,10 @@
 ### 분석 및 모니터링
 - [AnalyticsModule](Modules/AnalyticsModule.md) - 게임 이벤트 수집 및 분석
 
-### 도구
-- [Tools](Tools/README.md) - 개발 보조 도구 모음
-  - [UI Framework](Tools/UI/README.md) - 사용자 인터페이스 시스템
-  - [Attributes](Tools/Attributes.md) - Unity 인스펙터 확장
-  - [Terminal](Tools/Terminal.md) - 디버그 터미널
-  - [Tweener](Tools/Tweener.md) - 애니메이션 도구
-  - [Utilities](Tools/Utilities.md) - 유틸리티 모음
+### Tools
+- [Tools](Tools/README.md) - Collection of helper utilities
+  - [UI Framework](Tools/UI/README.md) - User interface system
+  - [Attributes](Tools/Attributes.md) - Unity inspector extensions
+  - [Terminal](Tools/Terminal.md) - Debug terminal
+  - [Tweener](Tools/Tweener.md) - Animation utilities
+  - [Utilities](Tools/Utilities.md) - Helper functions
