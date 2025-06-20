@@ -1,13 +1,13 @@
 # Master Server Toolkit - Lobbies
 
-## Описание
-Модуль для создания и управления игровыми лобби, включая создание групп игроков, управление готовностью и запуск игр.
+## Description
+Module for creating and managing game lobbies including party creation, ready checks, and starting games.
 
 ## LobbiesModule
 
-Основной класс для управления игровыми лобби.
+Main class for lobby management.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Configuration")]
 public int createLobbiesPermissionLevel = 0;
@@ -15,11 +15,11 @@ public bool dontAllowCreatingIfJoined = true;
 public int joinedLobbiesLimit = 1;
 ```
 
-## Создание лобби
+## Creating a lobby
 
-### Регистрация фабрики лобби:
+### Registering a lobby factory:
 ```csharp
-// Создание фабрики
+// Create the factory
 var factory = new LobbyFactoryAnonymous("Game_Lobby", lobbyModule);
 factory.CreateNewLobbyHandler = (properties, user) =>
 {
@@ -35,17 +35,17 @@ factory.CreateNewLobbyHandler = (properties, user) =>
             new LobbyTeam("Team B") { MaxPlayers = 5 }
         }
     };
-    
+
     return new GameLobby(lobbyModule.NextLobbyId(), config, lobbyModule);
 };
 
-// Регистрация фабрики
+// Register the factory
 lobbyModule.AddFactory(factory);
 ```
 
-### Создание лобби (клиент):
+### Creating a lobby (client):
 ```csharp
-// Создание лобби
+// Create a lobby
 var properties = new MstProperties();
 properties.Set(MstDictKeys.LOBBY_FACTORY_ID, "Game_Lobby");
 properties.Set("name", "Epic Battle Room");
@@ -62,39 +62,39 @@ Mst.Client.Connection.SendMessage(MstOpCodes.CreateLobby, properties, (status, r
 });
 ```
 
-## Присоединение к лобби
+## Joining a lobby
 
-### Присоединение (клиент):
+### Joining (client):
 ```csharp
-// Присоединение к лобби
+// Join a lobby
 Mst.Client.Connection.SendMessage(MstOpCodes.JoinLobby, lobbyId, (status, response) =>
 {
     if (status == ResponseStatus.Success)
     {
         var lobbyData = response.AsPacket<LobbyDataPacket>();
         Debug.Log($"Joined lobby: {lobbyData.Name}");
-        
-        // Подписка на события лобби
+
+        // Subscribe to lobby events
         SubscribeToLobbyEvents();
     }
 });
 
-// Покинуть лобби
+// Leave the lobby
 Mst.Client.Connection.SendMessage(MstOpCodes.LeaveLobby, lobbyId);
 ```
 
-## События лобби
+## Lobby events
 
-### Подписка на события:
+### Subscribing to events:
 ```csharp
-// Подписка на изменения
+// Subscribe to changes
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.LobbyMemberJoined, OnMemberJoined);
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.LobbyMemberLeft, OnMemberLeft);
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.LobbyStateChange, OnLobbyStateChange);
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.LobbyMemberReadyStatusChange, OnMemberReadyChange);
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.LobbyChatMessage, OnChatMessage);
 
-// Обработчики
+// Handlers
 private void OnMemberJoined(IIncomingMessage message)
 {
     var memberData = message.AsPacket<LobbyMemberData>();
@@ -108,11 +108,11 @@ private void OnLobbyStateChange(IIncomingMessage message)
 }
 ```
 
-## Управление свойствами
+## Property management
 
-### Свойства лобби:
+### Lobby properties:
 ```csharp
-// Установка свойств лобби (только владелец)
+// Set lobby properties (owner only)
 var properties = new MstProperties();
 properties.Set("map", "forest");
 properties.Set("gameMode", "battle");
@@ -127,9 +127,9 @@ var packet = new LobbyPropertiesSetPacket
 Mst.Client.Connection.SendMessage(MstOpCodes.SetLobbyProperties, packet);
 ```
 
-### Свойства игрока:
+### Player properties:
 ```csharp
-// Установка своих свойств
+// Set your properties
 var myProperties = new Dictionary<string, string>
 {
     { "character", "warrior" },
@@ -140,20 +140,20 @@ var myProperties = new Dictionary<string, string>
 Mst.Client.Connection.SendMessage(MstOpCodes.SetMyProperties, myProperties.ToBytes());
 ```
 
-## Команды
+## Commands
 
-### Готовность игрока:
+### Player ready state:
 ```csharp
-// Установить себя готовым
+// Set ready
 Mst.Client.Connection.SendMessage(MstOpCodes.SetLobbyAsReady, 1);
 
-// Отменить готовность
+// Cancel ready
 Mst.Client.Connection.SendMessage(MstOpCodes.SetLobbyAsReady, 0);
 ```
 
-### Присоединение к команде:
+### Joining a team:
 ```csharp
-// Присоединиться к команде
+// Join a team
 var joinTeamPacket = new LobbyJoinTeamPacket
 {
     LobbyId = currentLobbyId,
@@ -163,15 +163,15 @@ var joinTeamPacket = new LobbyJoinTeamPacket
 Mst.Client.Connection.SendMessage(MstOpCodes.JoinLobbyTeam, joinTeamPacket);
 ```
 
-## Чат в лобби
+## Lobby chat
 
-### Отправка сообщений:
+### Sending messages:
 ```csharp
-// Отправка сообщения в чат лобби
+// Send a lobby chat message
 string chatMessage = "Hello everyone!";
 Mst.Client.Connection.SendMessage(MstOpCodes.SendMessageToLobbyChat, chatMessage);
 
-// Получение сообщений
+// Receive messages
 private void OnChatMessage(IIncomingMessage message)
 {
     var chatData = message.AsPacket<LobbyChatPacket>();
@@ -179,11 +179,11 @@ private void OnChatMessage(IIncomingMessage message)
 }
 ```
 
-## Запуск игры
+## Starting the game
 
-### Ручной запуск:
+### Manual start:
 ```csharp
-// Начать игру (только владелец лобби)
+// Start the game (lobby owner only)
 Mst.Client.Connection.SendMessage(MstOpCodes.StartLobbyGame, (status, response) =>
 {
     if (status == ResponseStatus.Success)
@@ -193,126 +193,125 @@ Mst.Client.Connection.SendMessage(MstOpCodes.StartLobbyGame, (status, response) 
 });
 ```
 
-### Автоматический запуск:
+### Automatic start:
 ```csharp
-// Настройка автозапуска
+// Autostart settings
 var config = new LobbyConfig
 {
     EnableReadySystem = true,
     MinPlayersToStart = 2,
-    MaxWaitTime = 30000 // 30 секунд
+    MaxWaitTime = 30000 // 30 seconds
 };
 
-// Игра начнется автоматически когда:
-// 1. Минимум игроков готовы
-// 2. Истекло время ожидания
+// The game will start automatically when:
+// 1. Minimum players are ready
+// 2. The waiting time expires
 ```
 
-## Реализация пользовательского лобби
-
+## Implementing a custom lobby
 ```csharp
 public class RankedGameLobby : BaseLobby
 {
-    public RankedGameLobby(int lobbyId, ILobbyFactory factory, 
+    public RankedGameLobby(int lobbyId, ILobbyFactory factory,
         LobbiesModule module) : base(lobbyId, factory, module)
     {
-        // Кастомные настройки
+        // Custom settings
         EnableTeamSwitching = false;
         EnableReadySystem = true;
         MaxPlayers = 10;
     }
-    
+
     public override bool AddPlayer(LobbyUserPeerExtension playerExt, out string error)
     {
-        // Проверка рейтинга игрока
+        // Check player rating
         var playerProfile = GetPlayerProfile(playerExt);
         if (playerProfile.Rating < RequiredRating)
         {
             error = "Rating too low for this lobby";
             return false;
         }
-        
-        // Автоматическое распределение по командам
+
+        // Auto assign to teams
         AutoBalanceTeams(playerExt);
-        
+
         return base.AddPlayer(playerExt, out error);
     }
-    
+
     protected override void OnGameStart()
     {
-        // Кастомная логика старта
+        // Custom start logic
         CalculateTeamBalance();
         ApplyRatingModifiers();
-        
+
         base.OnGameStart();
     }
 }
 ```
 
-## Интеграция с другими модулями
+## Integration with other modules
 
-### С Spawner:
+### With Spawner:
 ```csharp
-// Автоматическое создание сервера при старте игры
+// Automatically create a server when the game starts
 protected override void OnGameStart()
 {
     var spawnOptions = new MstProperties();
     spawnOptions.Set("map", Properties["map"]);
     spawnOptions.Set("gameMode", Properties["gameMode"]);
-    
+
     SpawnersModule.Spawn(spawnOptions, (spawner, data) =>
     {
         GamePort = data.RoomPort;
         GameIp = data.RoomIp;
-        // Игроки получат доступ к серверу
+        // Players will get access to the server
     });
 }
 ```
 
-### С Matchmaker:
+### With Matchmaker:
 ```csharp
-// Интеграция с матчмейкингом
+// Integration with matchmaking
 var factory = new LobbyFactoryAnonymous("Matchmaking_Lobby", lobbyModule);
 factory.CreateNewLobbyHandler = (properties, user) =>
 {
     var matchmakingData = properties.AsPacket<MatchmakingRequestPacket>();
     var lobby = new MatchmakingLobby();
-    
-    // Настройка на основе данных матчмейкинга
+
+    // Configure based on matchmaking data
     lobby.SetupMatchmaking(matchmakingData);
-    
+
     return lobby;
 };
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Используйте фабрики** для создания разных типов лобби
-2. **Валидируйте свойства** перед добавлением игроков
-3. **Настройте автобаланс** для справедливой игры
-4. **Обрабатывайте события** для создания отзывчивого UI
-5. **Очищайте пустые лобби** для освобождения ресурсов
-6. **Логируйте действия** для отладки и аналитики
-7. **Защищайте от злоупотреблений** с помощью лимитов
+1. **Use factories** to create different lobby types
+2. **Validate properties** before adding players
+3. **Enable auto-balance** for fair matches
+4. **Handle events** to build responsive UI
+5. **Clean up empty lobbies** to free resources
+6. **Log actions** for debugging and analytics
+7. **Protect against abuse** with limits
 
-## Примеры UI
+## UI examples
 
-### Простой список лобби:
+### Simple lobby list:
 ```csharp
 public class LobbyListUI : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject lobbyItemPrefab;
     public Transform lobbyList;
-    
+
     void Start()
     {
         RefreshLobbyList();
     }
-    
+
     void RefreshLobbyList()
     {
-        // Получение списка публичных лобби
+        // Get a list of public lobbies
         Mst.Client.Lobbies.GetPublicLobbies((lobbies) =>
         {
             foreach (var lobby in lobbies)

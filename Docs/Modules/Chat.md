@@ -1,13 +1,13 @@
 # Master Server Toolkit - Chat
 
-## Описание
-Модуль для создания чат-системы с поддержкой каналов, приватных сообщений и проверки нецензурных слов.
+## Description
+Module for creating a chat system with channel support, private messages, and profanity checking.
 
 ## ChatModule
 
-Основной класс для управления чатом.
+Main class for chat management.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("General Settings")]
 [SerializeField] protected bool useAuthModule = true;
@@ -21,150 +21,150 @@
 [SerializeField] protected int maxChannelNameLength = 25;
 ```
 
-## Работа с каналами
+## Working with channels
 
-### Создание/получение канала:
+### Creating or getting a channel:
 ```csharp
-// Получить или создать канал
+// Get or create a channel
 var channel = chatModule.GetOrCreateChannel("general");
 
-// Проверка на запрещенные слова
-var channel = chatModule.GetOrCreateChannel("badword", true); // игнорировать проверку
+// Bypass censorship check
+var channel = chatModule.GetOrCreateChannel("badword", true);
 ```
 
-### Присоединение к каналу:
+### Joining a channel:
 ```csharp
-// Отправка запроса на сервер
+// Send a join request to the server
 Mst.Client.Connection.SendMessage(MstOpCodes.JoinChannel, "general");
 
-// Получение текущих каналов
+// Get current channels
 Mst.Client.Connection.SendMessage(MstOpCodes.GetCurrentChannels);
 ```
 
-### Управление каналами:
+### Channel management:
 ```csharp
-// Покинуть канал
+// Leave a channel
 Mst.Client.Connection.SendMessage(MstOpCodes.LeaveChannel, "general");
 
-// Установить канал по умолчанию
+// Set default channel
 Mst.Client.Connection.SendMessage(MstOpCodes.SetDefaultChannel, "global");
 
-// Получить список пользователей в канале
+// Get list of users in a channel
 Mst.Client.Connection.SendMessage(MstOpCodes.GetUsersInChannel, "general");
 ```
 
-## Отправка сообщений
+## Sending messages
 
-### Типы сообщений:
+### Message types:
 ```csharp
 public enum ChatMessageType : byte
 {
-    ChannelMessage, // Сообщение в канал
-    PrivateMessage  // Приватное сообщение
+    ChannelMessage, // Channel message
+    PrivateMessage  // Private message
 }
 ```
 
-### Отправка сообщений:
+### Sending messages:
 ```csharp
-// Сообщение в канал
+// Message to a channel
 var channelMsg = new ChatMessagePacket
 {
     MessageType = ChatMessageType.ChannelMessage,
-    Receiver = "general",  // имя канала
+    Receiver = "general",  // channel name
     Message = "Hello everyone!"
 };
 Mst.Client.Connection.SendMessage(MstOpCodes.ChatMessage, channelMsg);
 
-// Сообщение в личный канал (без указания получателя)
+// Message to the default local channel
 var localMsg = new ChatMessagePacket
 {
     MessageType = ChatMessageType.ChannelMessage,
-    Receiver = null, // отправится в DefaultChannel
+    Receiver = null, // sent to DefaultChannel
     Message = "Hello local channel!"
 };
 
-// Приватное сообщение
+// Private message
 var privateMsg = new ChatMessagePacket
 {
     MessageType = ChatMessageType.PrivateMessage,
-    Receiver = "username",  // имя пользователя
+    Receiver = "username",  // user name
     Message = "Hello privately!"
 };
 ```
 
-## Управление пользователями
+## User management
 
-### Установка имени пользователя:
+### Setting the username:
 ```csharp
-// Если allowUsernamePicking = true
+// If allowUsernamePicking = true
 Mst.Client.Connection.SendMessage(MstOpCodes.PickUsername, "myUsername");
 ```
 
-### Работа с ChatUserPeerExtension:
+### Working with ChatUserPeerExtension:
 ```csharp
-// Получить расширение пользователя
+// Get the user extension
 var chatUser = peer.GetExtension<ChatUserPeerExtension>();
 
-// Изменить имя пользователя
-chatModule.ChangeUsername(peer, "newUsername", true); // сохранить каналы
+// Change username
+chatModule.ChangeUsername(peer, "newUsername", true); // keep channels
 
-// Доступ к каналам пользователя
+// Access user channels
 var channels = chatUser.CurrentChannels;
 var defaultChannel = chatUser.DefaultChannel;
 ```
 
-## Интеграция с другими модулями
+## Integration with other modules
 
-### Интеграция с AuthModule:
+### With AuthModule:
 ```csharp
-// При useAuthModule = true
+// When useAuthModule = true
 authModule.OnUserLoggedInEvent += OnUserLoggedInEventHandler;
 authModule.OnUserLoggedOutEvent += OnUserLoggedOutEventHandler;
 
-// Автоматическое создание ChatUser при входе
+// ChatUser is created automatically on login
 ```
 
-### Интеграция с CensorModule:
+### With CensorModule:
 ```csharp
-// При useCensorModule = true
-// Автоматическая проверка сообщений на нецензурные слова
-// Замена запрещенного сообщения на предупреждение
+// When useCensorModule = true
+// Messages are automatically checked for profanity
+// Forbidden messages are replaced with a warning
 ```
 
-## Кастомизация
+## Customization
 
-### Переопределение обработки сообщений:
+### Overriding message handling:
 ```csharp
 protected override bool TryHandleChatMessage(ChatMessagePacket chatMessage, ChatUserPeerExtension sender, IIncomingMessage message)
 {
-    // Кастомная логика обработки
+    // Custom processing
     if (chatMessage.Message.StartsWith("/"))
     {
         HandleCommand(chatMessage);
         return true;
     }
-    
+
     return base.TryHandleChatMessage(chatMessage, sender, message);
 }
 ```
 
-### Создание кастомных пользователей:
+### Creating custom users:
 ```csharp
 protected override ChatUserPeerExtension CreateChatUser(IPeer peer, string username)
 {
-    // Создание расширенного пользователя
+    // Create an extended user
     return new MyChatUserExtension(peer, username);
 }
 ```
 
-## Клиентский код (MstChatClient)
+## Client code (MstChatClient)
 
-### Подписка на события:
+### Subscribing to events:
 ```csharp
-// Подключение к чат-модулю
+// Connect to the chat module
 Mst.Client.Chat.Connection = connection;
 
-// События
+// Events
 Mst.Client.Chat.OnMessageReceivedEvent += (message) => {
     Debug.Log($"[{message.Sender}]: {message.Message}");
 };
@@ -178,21 +178,21 @@ Mst.Client.Chat.OnJoinedChannelEvent += (channel) => {
 };
 ```
 
-### Отправка сообщений с клиента:
+### Sending messages from the client:
 ```csharp
-// В канал
+// To a channel
 Mst.Client.Chat.SendToChannel("general", "Hello world!");
 
-// Приватное сообщение
+// Private message
 Mst.Client.Chat.SendToUser("username", "Secret message");
 
-// В локальный канал
+// To the local channel
 Mst.Client.Chat.SendToLocalChannel("Hello local!");
 ```
 
-## Примеры использования
+## Usage examples
 
-### Создание игрового чата:
+### Creating a game chat:
 ```csharp
 public class GameChatUI : MonoBehaviour
 {
@@ -200,26 +200,26 @@ public class GameChatUI : MonoBehaviour
     public InputField messageInput;
     public Text chatLog;
     public Dropdown channelDropdown;
-    
+
     void Start()
     {
-        // Присоединиться к общему каналу
+        // Join the general channel
         Mst.Client.Chat.JoinChannel("general");
         Mst.Client.Chat.SetDefaultChannel("general");
-        
-        // Событие получения сообщения
+
+        // Message received event
         Mst.Client.Chat.OnMessageReceivedEvent += OnMessageReceived;
-        
-        // События каналов
+
+        // Channel events
         Mst.Client.Chat.OnChannelUsersChanged += OnChannelUsersChanged;
     }
-    
+
     private void OnMessageReceived(ChatMessagePacket message)
     {
         string formattedMsg = $"{message.Sender}: {message.Message}\n";
         chatLog.text += formattedMsg;
     }
-    
+
     public void SendMessage()
     {
         if (!string.IsNullOrEmpty(messageInput.text))
@@ -231,7 +231,7 @@ public class GameChatUI : MonoBehaviour
 }
 ```
 
-### Система команд в чате:
+### Chat command system:
 ```csharp
 protected override bool TryHandleChatMessage(ChatMessagePacket chatMessage, ChatUserPeerExtension sender, IIncomingMessage message)
 {
@@ -239,7 +239,7 @@ protected override bool TryHandleChatMessage(ChatMessagePacket chatMessage, Chat
     {
         var command = chatMessage.Message.Split(' ')[0].Substring(1);
         var args = chatMessage.Message.Split(' ').Skip(1).ToArray();
-        
+
         switch (command)
         {
             case "whisper":
@@ -247,32 +247,32 @@ protected override bool TryHandleChatMessage(ChatMessagePacket chatMessage, Chat
                 {
                     var targetUser = args[0];
                     var privateMsg = string.Join(" ", args.Skip(1));
-                    // Отправить приватное сообщение
+                    // Send a private message
                 }
                 break;
-                
+
             case "join":
                 if (args.Length > 0)
                 {
-                    // Присоединиться к каналу
+                    // Join a channel
                 }
                 break;
         }
-        
+
         message.Respond(ResponseStatus.Success);
         return true;
     }
-    
+
     return base.TryHandleChatMessage(chatMessage, sender, message);
 }
 ```
 
-## Лучшие практики
+## Best practices
 
-1. **Всегда используйте AuthModule** для автоматической настройки пользователей
-2. **Настройте CensorModule** для фильтрации нецензурных слов
-3. **Ограничивайте длину имени канала** для предотвращения злоупотреблений
-4. **Используйте приватные сообщения** для чувствительной информации
-5. **Создавайте различные каналы** для разных целей (общий, торговля, гильдия)
-6. **Очищайте пустые каналы** для оптимизации ресурсов
-7. **Логируйте все сообщения** для модерации и анализа
+1. **Always use AuthModule** for automatic user setup
+2. **Configure CensorModule** to filter profanity
+3. **Limit channel name length** to prevent abuse
+4. **Use private messages** for sensitive information
+5. **Create separate channels** for different purposes (general, trade, guild)
+6. **Clean up empty channels** to save resources
+7. **Log all messages** for moderation and analytics
