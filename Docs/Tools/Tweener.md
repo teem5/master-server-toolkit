@@ -1,60 +1,60 @@
 # Master Server Toolkit - Tweener
 
-## Описание
-Гибкая система для создания анимированных переходов, интерполяций и отложенных действий. Tweener позволяет плавно изменять значения различных типов (float, int, string) с течением времени, а также создавать последовательности действий.
+## Description
+A flexible system for creating animated transitions, interpolations and delayed actions. Tweener smoothly changes values of different types (float, int, string) over time and allows you to build sequences of actions.
 
-## Основные возможности
+## Key Features
 
-### Базовый Tweener
-Общий класс для управления и запуска всех Tween-действий.
+### Basic Tweener
+Common class for managing and running all tween actions.
 
 ```csharp
-// Запуск простого действия
+// Start a simple action
 TweenerActionInfo actionInfo = Tweener.Start(() => {
-    // Возвращаем true, когда действие завершено
+    // Return true when the action is complete
     return true;
 });
 
-// Отмена действия
+// Cancel the action
 actionInfo.Cancel();
-// или
+// or
 Tweener.Cancel(actionInfo);
-// или по ID
+// or by ID
 Tweener.Cancel(actionId);
 
-// Проверка, выполняется ли действие
+// Check if the action is running
 bool isRunning = actionInfo.IsRunning;
-// или
+// or
 bool isRunning = Tweener.IsRunning(actionInfo);
-// или по ID
+// or by ID
 bool isRunning = Tweener.IsRunning(actionId);
 
-// Обработка завершения
+// Handle completion
 actionInfo.OnComplete((id) => {
-    Debug.Log($"Действие {id} завершено");
+    Debug.Log($"Action {id} completed");
 });
-// или
+// or
 Tweener.AddOnCompleteListener(actionInfo, (id) => {
-    Debug.Log($"Действие {id} завершено");
+    Debug.Log($"Action {id} completed");
 });
 ```
 
 ### Tween.Float
-Плавная интерполяция значений с плавающей точкой.
+Smooth interpolation of floating point values.
 
 ```csharp
-// Переход от 0 до 1 за 2 секунды с линейной интерполяцией
+// Transition from 0 to 1 over 2 seconds with linear interpolation
 TweenerActionInfo actionInfo = Tween.Float(0f, 1f, 2f, Easing.Linear, (float value) => {
-    // Обновление значения во время анимации
+    // Update value during the animation
     myCanvasGroup.alpha = value;
 });
 
-// Переход с отложенным стартом
+// Delayed start
 TweenerActionInfo actionInfo = Tween.Float(0f, 1f, 2f, Easing.Linear, (float value) => {
     myCanvasGroup.alpha = value;
-}, 1f); // Задержка в 1 секунду
+}, 1f); // Delay of 1 second
 
-// Переход с кастомной кривой анимации
+// Transition using a custom animation curve
 AnimationCurve curve = new AnimationCurve(
     new Keyframe(0, 0),
     new Keyframe(0.5f, 0.8f),
@@ -65,90 +65,90 @@ TweenerActionInfo actionInfo = Tween.Float(0f, 1f, 2f, curve, (float value) => {
     myCanvasGroup.alpha = value;
 });
 
-// Переход с обратной анимацией (пинг-понг)
+// Reverse animation (ping-pong)
 TweenerActionInfo actionInfo = Tween.Float(0f, 1f, 2f, Easing.Linear, (float value) => {
     myCanvasGroup.alpha = value;
 }, 0f, true);
 ```
 
 ### Tween.Int
-Плавная интерполяция целочисленных значений.
+Smooth interpolation of integer values.
 
 ```csharp
-// Анимация счетчика от 0 до 100 за 3 секунды
+// Animate counter from 0 to 100 over 3 seconds
 TweenerActionInfo actionInfo = Tween.Int(0, 100, 3f, Easing.OutQuad, (int value) => {
     scoreText.text = value.ToString();
 });
 
-// Анимация с обратным отсчетом
+// Countdown animation
 TweenerActionInfo actionInfo = Tween.Int(10, 0, 5f, Easing.Linear, (int value) => {
     countdownText.text = value.ToString();
 });
 ```
 
 ### Tween.String
-Анимированная замена символов в строке.
+Animated replacement of characters in a string.
 
 ```csharp
-// Анимация печатающегося текста
-TweenerActionInfo actionInfo = Tween.String("", "Привет, мир!", 2f, (string value) => {
+// Typewriter effect
+TweenerActionInfo actionInfo = Tween.String("", "Hello, world!", 2f, (string value) => {
     dialogText.text = value;
 });
 
-// Анимация с маской ввода
+// Masked input animation
 TweenerActionInfo actionInfo = Tween.String("", "12345", 1f, (string value) => {
     passwordText.text = new string('*', value.Length);
 });
 ```
 
-### Вспомогательные методы
+### Helper Methods
 
-#### Wait - ожидание заданного времени
+#### Wait - wait for a specified time
 ```csharp
-// Ожидание 2 секунды и выполнение действия
+// Wait 2 seconds and then execute an action
 TweenerActionInfo actionInfo = Tween.Wait(2f, () => {
     DoSomething();
 });
 
-// Ожидание в последовательности действий
+// Waiting inside a sequence
 StartCoroutine(WaitExample());
 
 IEnumerator WaitExample()
 {
-    Debug.Log("Действие 1");
-    
-    // Ожидание через Tween
+    Debug.Log("Action 1");
+
+    // Waiting with Tween
     var waitInfo = Tween.Wait(2f, null);
     yield return new WaitUntil(() => !waitInfo.IsRunning);
-    
-    Debug.Log("Действие 2");
+
+    Debug.Log("Action 2");
 }
 ```
 
-#### Sequence - последовательность действий
+#### Sequence - chain of actions
 ```csharp
-// Создание последовательности действий
+// Create a sequence of actions
 Tween.Sequence()
     .Add(() => {
-        Debug.Log("Шаг 1");
+        Debug.Log("Step 1");
         return true;
     })
     .Wait(1f)
     .Add(() => {
-        Debug.Log("Шаг 2");
+        Debug.Log("Step 2");
         return true;
     })
     .Wait(1f)
     .Add(() => {
-        Debug.Log("Шаг 3");
+        Debug.Log("Step 3");
         return true;
     })
     .Start();
 ```
 
-#### RepeatForever - бесконечное повторение
+#### RepeatForever - endless loop
 ```csharp
-// Пульсация объекта
+// Pulse an object
 Tween.RepeatForever(() => {
     return Tween.Sequence()
         .Add(Tween.Float(1f, 1.2f, 0.5f, Easing.InOutQuad, (value) => {
@@ -160,48 +160,48 @@ Tween.RepeatForever(() => {
 });
 ```
 
-## Функции анимации (Easing)
+## Easing Functions
 
-Tweener поддерживает различные функции анимации для управления характером перехода:
+Tweener supports various easing functions to control the nature of transitions:
 
 ```csharp
-// Линейная интерполяция
+// Linear interpolation
 Easing.Linear
 
-// Квадратичные функции
+// Quadratic functions
 Easing.InQuad
 Easing.OutQuad
 Easing.InOutQuad
 
-// Кубические функции
+// Cubic functions
 Easing.InCubic
 Easing.OutCubic
 Easing.InOutCubic
 
-// Пружинные функции
+// Bounce functions
 Easing.InBounce
 Easing.OutBounce
 Easing.InOutBounce
 
-// Эластичные функции
+// Elastic functions
 Easing.InElastic
 Easing.OutElastic
 Easing.InOutElastic
 
-// Кривая интерполяции из редактора
+// Interpolation curve from the editor
 AnimationCurve customCurve = new AnimationCurve(...);
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Анимация UI элементов
+### Animating UI elements
 ```csharp
-// Плавное появление панели
+// Smoothly show a panel
 void ShowPanel()
 {
     panel.gameObject.SetActive(true);
     panel.transform.localScale = Vector3.zero;
-    
+
     Tween.Sequence()
         .Add(Tween.Float(0f, 1f, 0.3f, Easing.OutBack, (value) => {
             panel.transform.localScale = new Vector3(value, value, value);
@@ -212,7 +212,7 @@ void ShowPanel()
         .Start();
 }
 
-// Плавное исчезновение панели
+// Smoothly hide the panel
 void HidePanel()
 {
     Tween.Sequence()
@@ -230,37 +230,37 @@ void HidePanel()
 }
 ```
 
-### Анимация камеры
+### Camera animation
 ```csharp
-// Плавное перемещение камеры
+// Smooth camera movement
 void MoveCamera(Vector3 targetPosition, float duration)
 {
     Vector3 startPosition = Camera.main.transform.position;
-    
+
     Tween.Float(0f, 1f, duration, Easing.InOutQuad, (value) => {
         Camera.main.transform.position = Vector3.Lerp(startPosition, targetPosition, value);
     });
 }
 
-// Плавное изменение поля зрения камеры
+// Smooth change of camera FOV
 void ZoomCamera(float targetFOV, float duration)
 {
     float startFOV = Camera.main.fieldOfView;
-    
+
     Tween.Float(0f, 1f, duration, Easing.OutQuad, (value) => {
         Camera.main.fieldOfView = Mathf.Lerp(startFOV, targetFOV, value);
     });
 }
 ```
 
-### Создание игровых эффектов
+### Creating game effects
 ```csharp
-// Эффект мигания при уроне
+// Damage flash effect
 void DamageFlash(SpriteRenderer renderer)
 {
     Color normalColor = renderer.color;
     Color flashColor = Color.red;
-    
+
     Tween.Sequence()
         .Add(Tween.Float(0f, 1f, 0.1f, Easing.Linear, (value) => {
             renderer.color = Color.Lerp(normalColor, flashColor, value);
@@ -271,12 +271,12 @@ void DamageFlash(SpriteRenderer renderer)
         .Start();
 }
 
-// Эффект пульсации
+// Pulse effect
 void PulseEffect(Transform target)
 {
     Vector3 originalScale = target.localScale;
     Vector3 targetScale = originalScale * 1.2f;
-    
+
     Tween.Sequence()
         .Add(Tween.Float(0f, 1f, 0.3f, Easing.OutQuad, (value) => {
             target.localScale = Vector3.Lerp(originalScale, targetScale, value);
@@ -288,12 +288,12 @@ void PulseEffect(Transform target)
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Отменяйте незавершенные действия** при уничтожении объектов или смене сцен
-2. **Группируйте связанные анимации** в последовательности для лучшего контроля
-3. **Используйте подходящие функции** анимации для разных типов движения
-4. **Хранитие ссылки на TweenerActionInfo** для возможности отмены или проверки статуса
-5. **Обрабатывайте завершение** с помощью OnComplete для последовательных операций
-6. **Не злоупотребляйте бесконечными циклами** (RepeatForever), не забывайте их отменять
-7. **Используйте Wait** вместо WaitForSeconds в корутинах для единообразия
+1. **Cancel unfinished actions** when objects are destroyed or scenes change
+2. **Group related animations** in sequences for better control
+3. **Use appropriate easing functions** for different types of movement
+4. **Keep references to TweenerActionInfo** so you can cancel or check status
+5. **Handle completion** with OnComplete for sequential operations
+6. **Avoid overusing endless loops** (RepeatForever) and remember to cancel them
+7. **Use Wait** instead of WaitForSeconds in coroutines for consistency
