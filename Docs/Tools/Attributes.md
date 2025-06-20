@@ -1,51 +1,51 @@
 # Master Server Toolkit - Attributes
 
-## Описание
-Инструменты для работы с атрибутами и аннотациями в редакторе Unity, улучшающие пользовательский интерфейс инспектора.
+## Description
+Tools for working with attributes and annotations in the Unity editor that improve the inspector's user interface.
 
 ## HelpBox
 
-Класс для создания информационных блоков в инспекторе Unity с поддержкой различных типов сообщений.
+Class for creating informational boxes in the Unity inspector with support for different message types.
 
-### Основные свойства:
+### Main properties:
 
 ```csharp
-public string Text { get; set; }     // Текст сообщения
-public float Height { get; set; }     // Высота блока
-public HelpBoxType Type { get; set; } // Тип блока (Info, Warning, Error)
+public string Text { get; set; }     // Message text
+public float Height { get; set; }    // Box height
+public HelpBoxType Type { get; set; } // Box type (Info, Warning, Error)
 ```
 
-### Конструкторы:
+### Constructors:
 
 ```csharp
-// Создание с указанием высоты
+// Create with explicit height
 public HelpBox(string text, float height, HelpBoxType type = HelpBoxType.Info)
 
-// Создание со стандартной высотой
+// Create with default height
 public HelpBox(string text, HelpBoxType type = HelpBoxType.Info)
 
-// Создание пустого блока
+// Create an empty box
 public HelpBox()
 ```
 
-### Пример использования:
+### Usage example:
 
 ```csharp
-// В ScriptableObject или MonoBehaviour
+// Inside a ScriptableObject or MonoBehaviour
 [SerializeField]
-private HelpBox infoBox = new HelpBox("Это информационный блок", HelpBoxType.Info);
+private HelpBox infoBox = new HelpBox("This is an info box", HelpBoxType.Info);
 
 [SerializeField]
-private HelpBox warningBox = new HelpBox("Внимание! Это предупреждение", 60, HelpBoxType.Warning);
+private HelpBox warningBox = new HelpBox("Warning! This is a warning", 60, HelpBoxType.Warning);
 
 [SerializeField]
-private HelpBox errorBox = new HelpBox("Ошибка! Это сообщение об ошибке", HelpBoxType.Error);
+private HelpBox errorBox = new HelpBox("Error! This is an error message", HelpBoxType.Error);
 ```
 
-### Интеграция в редакторе:
+### Integration in the editor:
 
 ```csharp
-// В пользовательском редакторе
+// In a custom editor
 [CustomPropertyDrawer(typeof(HelpBox))]
 public class HelpBoxDrawer : PropertyDrawer
 {
@@ -54,15 +54,15 @@ public class HelpBoxDrawer : PropertyDrawer
         var textProp = property.FindPropertyRelative("Text");
         var typeProp = property.FindPropertyRelative("Type");
         var heightProp = property.FindPropertyRelative("Height");
-        
-        // Рисуем блок помощи в зависимости от типа
+
+        // Draw the help box depending on its type
         EditorGUI.HelpBox(
-            new Rect(position.x, position.y, position.width, heightProp.floatValue), 
-            textProp.stringValue, 
+            new Rect(position.x, position.y, position.width, heightProp.floatValue),
+            textProp.stringValue,
             (MessageType)typeProp.enumValueIndex
         );
     }
-    
+
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         return property.FindPropertyRelative("Height").floatValue;
@@ -70,20 +70,20 @@ public class HelpBoxDrawer : PropertyDrawer
 }
 ```
 
-### Типы блоков:
+### Box types:
 
 ```csharp
 public enum HelpBoxType
 {
-    Info,     // Информационное сообщение
-    Warning,  // Предупреждение
-    Error     // Ошибка
+    Info,     // Informational message
+    Warning,  // Warning message
+    Error     // Error message
 }
 ```
 
-## Практическое применение
+## Practical use
 
-### Документирование настроек:
+### Documenting settings:
 
 ```csharp
 [Serializable]
@@ -91,19 +91,19 @@ public class ConnectionSettings
 {
     [SerializeField]
     private HelpBox helpBox = new HelpBox(
-        "Укажите IP-адрес и порт сервера. Оставьте поле IP пустым для использования localhost.", 
+        "Specify the server IP and port. Leave IP empty to use localhost.",
         HelpBoxType.Info
     );
-    
+
     [SerializeField]
     private string serverIp;
-    
+
     [SerializeField]
     private int serverPort = 5000;
 }
 ```
 
-### Предупреждения в компонентах:
+### Component warnings:
 
 ```csharp
 [RequireComponent(typeof(NetworkIdentity))]
@@ -111,15 +111,15 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField]
     private HelpBox helpBox = new HelpBox(
-        "Этот компонент требует NetworkIdentity для корректной работы с сервером", 
+        "This component requires NetworkIdentity to work correctly with the server",
         HelpBoxType.Warning
     );
-    
-    // Реализация компонента
+
+    // Component implementation
 }
 ```
 
-### Сообщения об ошибках:
+### Error messages:
 
 ```csharp
 [Serializable]
@@ -127,14 +127,14 @@ public class SecuritySettings
 {
     [SerializeField]
     private HelpBox securityNote = new HelpBox(
-        "ВНИМАНИЕ! Никогда не сохраняйте чувствительные данные в исходном коде!", 
+        "WARNING! Never store sensitive data in source code!",
         80,
         HelpBoxType.Error
     );
-    
+
     [SerializeField]
     private string certificatePath;
-    
+
     [SerializeField]
     private string privateKey;
 }
