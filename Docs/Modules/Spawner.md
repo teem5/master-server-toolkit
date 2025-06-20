@@ -1,80 +1,80 @@
 # Master Server Toolkit - Spawner
 
-## Описание
-Модуль для управления процессами запуска игровых серверов в различных регионах с поддержкой балансировки нагрузки и очередей.
+## Description
+Module for managing game server launch processes in different regions with load balancing and queue support.
 
-## Основные компоненты
+## Main Components
 
 ### SpawnersModule
 ```csharp
-// Настройки
-[SerializeField] protected int createSpawnerPermissionLevel = 0; // Минимальный уровень прав для регистрации спаунера
-[SerializeField] protected float queueUpdateFrequency = 0.1f;    // Частота обновления очередей
-[SerializeField] protected bool enableClientSpawnRequests = true; // Разрешить запросы на спаун от клиентов
+// Settings
+[SerializeField] protected int createSpawnerPermissionLevel = 0; // Minimum permission level to register a spawner
+[SerializeField] protected float queueUpdateFrequency = 0.1f;    // Queue update frequency
+[SerializeField] protected bool enableClientSpawnRequests = true; // Allow spawn requests from clients
 
-// События
-public event Action<RegisteredSpawner> OnSpawnerRegisteredEvent;  // При регистрации спаунера
-public event Action<RegisteredSpawner> OnSpawnerDestroyedEvent;   // При удалении спаунера
-public event SpawnedProcessRegistrationHandler OnSpawnedProcessRegisteredEvent; // При регистрации процесса
+// Events
+public event Action<RegisteredSpawner> OnSpawnerRegisteredEvent;  // When a spawner registers
+public event Action<RegisteredSpawner> OnSpawnerDestroyedEvent;   // When a spawner is removed
+public event SpawnedProcessRegistrationHandler OnSpawnedProcessRegisteredEvent; // When a process registers
 ```
 
 ### RegisteredSpawner
 ```csharp
-// Основные свойства
-public int SpawnerId { get; }                // Уникальный ID спаунера
-public IPeer Peer { get; }                   // Подключение к спаунеру
-public SpawnerOptions Options { get; }       // Настройки спаунера
-public int ProcessesRunning { get; }         // Количество запущенных процессов
-public int QueuedTasks { get; }              // Количество задач в очереди
+// Main properties
+public int SpawnerId { get; }                // Spawner unique ID
+public IPeer Peer { get; }                   // Connection to the spawner
+public SpawnerOptions Options { get; }       // Spawner settings
+public int ProcessesRunning { get; }         // Number of running processes
+public int QueuedTasks { get; }              // Number of tasks in queue
 
-// Методы
-public bool CanSpawnAnotherProcess();        // Может ли запустить еще один процесс
-public int CalculateFreeSlotsCount();        // Расчет количества свободных слотов
+// Methods
+public bool CanSpawnAnotherProcess();        // Can it spawn one more process
+public int CalculateFreeSlotsCount();        // Calculate free slot count
 ```
 
 ### SpawnerOptions
 ```csharp
-// Настройки спаунера
-public string MachineIp { get; set; }           // IP машины спаунера 
-public int MaxProcesses { get; set; } = 5;      // Максимальное количество процессов
-public string Region { get; set; } = "Global";  // Регион спаунера
-public Dictionary<string, string> CustomOptions { get; set; } // Дополнительные настройки
+// Spawner options
+public string MachineIp { get; set; }           // Spawner machine IP
+public int MaxProcesses { get; set; } = 5;      // Maximum number of processes
+public string Region { get; set; } = "Global";  // Spawner region
+public Dictionary<string, string> CustomOptions { get; set; } // Additional options
 ```
 
 ### SpawnTask
 ```csharp
-// Свойства
-public int Id { get; }                      // ID задачи
-public RegisteredSpawner Spawner { get; }   // Спаунер, выполняющий задачу
-public MstProperties Options { get; }       // Настройки запуска
-public SpawnStatus Status { get; }          // Текущий статус
-public string UniqueCode { get; }           // Уникальный код для безопасности
-public IPeer Requester { get; set; }        // Запросивший клиент
-public IPeer RegisteredPeer { get; private set; } // Зарегистрированный процесс
+// Properties
+public int Id { get; }                      // Task ID
+public RegisteredSpawner Spawner { get; }   // Spawner executing the task
+public MstProperties Options { get; }       // Spawn options
+public SpawnStatus Status { get; }          // Current status
+public string UniqueCode { get; }           // Unique security code
+public IPeer Requester { get; set; }        // Requesting client
+public IPeer RegisteredPeer { get; private set; } // Registered process
 
-// События
-public event Action<SpawnStatus> OnStatusChangedEvent; // При изменении статуса
+// Events
+public event Action<SpawnStatus> OnStatusChangedEvent; // When status changes
 ```
 
-## Статусы процесса SpawnStatus
+## SpawnStatus values
 ```csharp
 public enum SpawnStatus
 {
-    None,               // Начальный статус
-    Queued,             // В очереди
-    ProcessStarted,     // Процесс запущен
-    ProcessRegistered,  // Процесс зарегистрирован
-    Finalized,          // Финализирован
-    Aborted,            // Прерван
-    Killed              // Убит
+    None,               // Initial state
+    Queued,             // In queue
+    ProcessStarted,     // Process started
+    ProcessRegistered,  // Process registered
+    Finalized,          // Finalized
+    Aborted,            // Aborted
+    Killed              // Killed
 }
 ```
 
-## Процесс работы
+## Workflow
 
-### Регистрация спаунера
+### Spawner registration
 ```csharp
-// Клиент
+// Client
 var options = new SpawnerOptions
 {
     MachineIp = "192.168.1.10",
@@ -91,13 +91,13 @@ Mst.Client.Spawners.RegisterSpawner(options, (successful, spawnerId) =>
         Debug.Log($"Spawner registered with ID: {spawnerId}");
 });
 
-// Сервер
+// Server
 RegisteredSpawner spawner = CreateSpawner(peer, options);
 ```
 
-### Запрос на запуск игрового сервера
+### Spawn game server request
 ```csharp
-// Клиент
+// Client
 var spawnOptions = new MstProperties();
 spawnOptions.Set(Mst.Args.Names.RoomName, "MyGame");
 spawnOptions.Set(Mst.Args.Names.RoomMaxPlayers, 10);
@@ -109,44 +109,44 @@ Mst.Client.Spawners.RequestSpawn(spawnOptions, (successful, spawnId) =>
     {
         Debug.Log($"Spawn request created with ID: {spawnId}");
         
-        // Подписка на изменения статуса
+        // Subscribe to status changes
         Mst.Client.Spawners.OnStatusChangedEvent += OnSpawnStatusChanged;
     }
 });
 
-// Сервер
+// Server
 SpawnTask task = Spawn(options, region);
 ```
 
-### Выбор спаунера для запуска
+### Selecting a spawner to launch
 ```csharp
-// Фильтрация спаунеров по региону
+// Filter spawners by region
 var spawners = GetSpawnersInRegion(region);
 
-// Сортировка по доступным слотам
+// Sort by available slots
 var availableSpawners = spawners
     .OrderByDescending(s => s.CalculateFreeSlotsCount())
     .Where(s => s.CanSpawnAnotherProcess())
     .ToList();
 
-// Выбор спаунера
+// Choose spawner
 if (availableSpawners.Count > 0)
 {
     return availableSpawners[0];
 }
 ```
 
-### Завершение процесса спауна
+### Finalizing the spawn process
 ```csharp
-// На стороне процесса
+// On the process side
 var finalizationData = new MstProperties();
 finalizationData.Set("roomId", 12345);
 finalizationData.Set("connectionAddress", "192.168.1.10:12345");
 
-// Отправка данных о завершении
+// Send finalization data
 Mst.Client.Spawners.FinalizeSpawn(spawnTaskId, finalizationData);
 
-// На стороне клиента
+// On the client side
 Mst.Client.Spawners.GetFinalizationData(spawnId, (successful, data) =>
 {
     if (successful)
@@ -154,7 +154,7 @@ Mst.Client.Spawners.GetFinalizationData(spawnId, (successful, data) =>
         string connectionAddress = data.AsString("connectionAddress");
         int roomId = data.AsInt("roomId");
         
-        // Подключение к комнате
+        // Connect to the room
         ConnectToRoom(connectionAddress, roomId);
     }
 });
@@ -163,13 +163,13 @@ Mst.Client.Spawners.GetFinalizationData(spawnId, (successful, data) =>
 ## Управление регионами
 
 ```csharp
-// Получение всех регионов
+// Get all regions
 List<RegionInfo> regions = spawnersModule.GetRegions();
 
-// Получение спаунеров в конкретном регионе
+// Get spawners in a specific region
 List<RegisteredSpawner> regionalSpawners = spawnersModule.GetSpawnersInRegion("eu-west");
 
-// Создание спаунера в регионе
+// Create a spawner in a region
 var options = new SpawnerOptions { Region = "eu-west" };
 var spawner = spawnersModule.CreateSpawner(peer, options);
 ```
@@ -177,16 +177,16 @@ var spawner = spawnersModule.CreateSpawner(peer, options);
 ## Балансировка нагрузки
 
 ```csharp
-// Пример балансировки по наименее загруженным серверам
+// Example of balancing by least loaded servers
 public RegisteredSpawner GetLeastBusySpawner(string region)
 {
     var spawners = GetSpawnersInRegion(region);
     
-    // Если нет спаунеров в регионе, используем все доступные
+    // If there are no spawners in the region, use all available
     if (spawners.Count == 0)
         spawners = GetSpawners();
     
-    // Сортировка по загруженности
+    // Sort by load
     return spawners
         .OrderByDescending(s => s.CalculateFreeSlotsCount())
         .FirstOrDefault(s => s.CanSpawnAnotherProcess());
@@ -198,7 +198,7 @@ public RegisteredSpawner GetOptimalSpawner(MstProperties options)
     string region = options.AsString(Mst.Args.Names.RoomRegion, "");
     string gameMode = options.AsString("gameMode", "");
     
-    // Фильтрация по региону и игровому режиму
+    // Filter by region and game mode
     var filtered = spawnersList.Values
         .Where(s => (string.IsNullOrEmpty(region) || s.Options.Region == region) &&
                   (string.IsNullOrEmpty(gameMode) || 
@@ -214,32 +214,32 @@ public RegisteredSpawner GetOptimalSpawner(MstProperties options)
 
 ## Практический пример
 
-### Настройка системы:
+### System setup:
 ```csharp
-// 1. Регистрация спаунеров
+// 1. Register spawners
 RegisterSpawner("EU", "10.0.0.1", 10);
 RegisterSpawner("US", "10.0.1.1", 15);
 RegisterSpawner("ASIA", "10.0.2.1", 8);
 
-// 2. Клиентский запрос на создание игрового сервера
+// 2. Client request to create a game server
 var options = new MstProperties();
 options.Set(Mst.Args.Names.RoomName, "CustomGame");
 options.Set(Mst.Args.Names.RoomMaxPlayers, 16);
 options.Set(Mst.Args.Names.RoomRegion, "EU");
 options.Set("gameMode", "deathmatch");
 
-// 3. Обработка запроса, выбор спаунера и запуск процесса
+// 3. Handle request, choose spawner and start process
 SpawnTask task = spawnersModule.Spawn(options, "EU");
 
-// 4. Клиент ожидает завершения процесса
-// 5. Созданный процесс регистрируется и отправляет данные для подключения
+// 4. Client waits for process completion
+// 5. Spawned process registers and sends connection data
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Группируйте спаунеры по регионам** для оптимальной задержки
-2. **Настраивайте лимиты процессов** для каждого спаунера с учетом мощности сервера
-3. **Используйте кастомные опции** для гибкой настройки спаунера
-4. **Реализуйте отказоустойчивость** - если спаунер недоступен, перенаправьте задачу в другой регион
-5. **Мониторьте загруженность спаунеров** для обнаружения узких мест
-6. **Добавляйте тайм-ауты для задач** в очереди, чтобы избежать застревания
+1. **Group spawners by region** for optimal latency
+2. **Configure process limits** for each spawner based on server capacity
+3. **Use custom options** for flexible spawner setup
+4. **Implement fault tolerance** – redirect tasks to another region if a spawner is unavailable
+5. **Monitor spawner load** to detect bottlenecks
+6. **Add timeouts to tasks** in the queue to avoid stalling

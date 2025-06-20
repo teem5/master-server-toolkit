@@ -1,67 +1,67 @@
 # Master Server Toolkit - Quests
 
-## Описание
-Модуль для создания, отслеживания и выполнения игровых квестов с возможностью настройки цепочек заданий, временных ограничений и наград.
+## Description
+Module for creating, tracking and completing game quests with support for quest chains, time limits and rewards.
 
-## Основные структуры
+## Main Structures
 
 ### QuestData (ScriptableObject)
 ```csharp
 [CreateAssetMenu(menuName = "Master Server Toolkit/Quests/New Quest")]
 public class QuestData : ScriptableObject
 {
-    // Основная информация
-    public string Key => key;                 // Уникальный ключ квеста
-    public string Title => title;             // Название
-    public string Description => description; // Описание
-    public int RequiredProgress => requiredProgress; // Кол-во для завершения
-    public Sprite Icon => icon;               // Иконка квеста
+    // Basic information
+    public string Key => key;                 // Unique quest key
+    public string Title => title;             // Title
+    public string Description => description; // Description
+    public int RequiredProgress => requiredProgress; // Amount to complete
+    public Sprite Icon => icon;               // Quest icon
     
-    // Сообщения для разных статусов
-    public string StartMessage => startMessage;       // Сообщение при взятии квеста
-    public string ActiveMessage => activeMessage;     // Сообщение во время выполнения
-    public string CompletedMessage => completedMessage; // Сообщение при завершении
-    public string CancelMessage => cancelMessage;      // Сообщение при отмене
-    public string ExpireMessage => expireMessage;      // Сообщение при истечении срока
+    // Messages for different states
+    public string StartMessage => startMessage;       // When the quest is taken
+    public string ActiveMessage => activeMessage;     // While active
+    public string CompletedMessage => completedMessage; // Upon completion
+    public string CancelMessage => cancelMessage;      // On cancel
+    public string ExpireMessage => expireMessage;      // When expired
     
-    // Настройки
-    public bool IsOneTime => isOneTime;               // Одноразовый квест
-    public int TimeToComplete => timeToComplete;      // Время на выполнение (мин)
+    // Settings
+    public bool IsOneTime => isOneTime;               // One-time quest
+    public int TimeToComplete => timeToComplete;      // Time to complete (min)
     
-    // Связи с другими квестами
-    public QuestData ParentQuest => parentQuest;       // Родительский квест
-    public QuestData[] ChildrenQuests => childrenQuests; // Дочерние квесты
+    // Connections with other quests
+    public QuestData ParentQuest => parentQuest;       // Parent quest
+    public QuestData[] ChildrenQuests => childrenQuests; // Child quests
 }
 ```
 
-### Статусы квестов
+### Quest statuses
 ```csharp
 public enum QuestStatus 
 { 
-    Inactive,   // Квест неактивен
-    Active,     // Квест активен
-    Completed,  // Квест завершен
-    Canceled,   // Квест отменен
-    Expired     // Время квеста истекло
+    Inactive,   // Quest is inactive
+    Active,     // Quest is active
+    Completed,  // Quest completed
+    Canceled,   // Quest canceled
+    Expired     // Quest time expired
 }
 ```
 
-### Интерфейс IQuestInfo
+### IQuestInfo interface
 ```csharp
 public interface IQuestInfo
 {
-    string Id { get; set; }                 // Уникальный ID
-    string Key { get; set; }                // Ключ квеста
-    string UserId { get; set; }             // ID пользователя
-    int Progress { get; set; }              // Текущий прогресс
-    int Required { get; set; }              // Требуемый прогресс
-    DateTime StartTime { get; set; }        // Время начала
-    DateTime ExpireTime { get; set; }       // Время истечения
-    DateTime CompleteTime { get; set; }     // Время завершения
-    QuestStatus Status { get; set; }        // Статус
-    string ParentQuestKey { get; set; }     // Ключ родительского квеста
-    string ChildrenQuestsKeys { get; set; } // Ключи дочерних квестов
-    bool TryToComplete(int progress);       // Метод для завершения квеста
+    string Id { get; set; }                 // Unique ID
+    string Key { get; set; }                // Quest key
+    string UserId { get; set; }             // User ID
+    int Progress { get; set; }              // Current progress
+    int Required { get; set; }              // Required progress
+    DateTime StartTime { get; set; }        // Start time
+    DateTime ExpireTime { get; set; }       // Expiration time
+    DateTime CompleteTime { get; set; }     // Completion time
+    QuestStatus Status { get; set; }        // Status
+    string ParentQuestKey { get; set; }     // Parent quest key
+    string ChildrenQuestsKeys { get; set; } // Child quest keys
+    bool TryToComplete(int progress);       // Method to complete the quest
 }
 ```
 
@@ -77,31 +77,31 @@ AddDependency<ProfilesModule>();
 protected bool clientCanUpdateProgress = false; // Может ли клиент обновлять прогресс
 
 [Header("Settings"), SerializeField]
-protected QuestsDatabase[] questsDatabases; // Базы данных квестов
+protected QuestsDatabase[] questsDatabases; // Quest databases
 ```
 
-### Основные операции сервера
-1. Получение списка квестов
-2. Начало квеста
-3. Обновление прогресса квеста
-4. Отмена квеста
-5. Проверка истечения срока квестов
+### Main server operations
+1. Retrieve the list of quests
+2. Start a quest
+3. Update quest progress
+4. Cancel a quest
+5. Check quest expiration
 
-### Интеграция с профилями
+### Profile integration
 ```csharp
 private void ProfilesModule_OnProfileLoaded(ObservableServerProfile profile)
 {
     if (profile.TryGet(ProfilePropertyOpCodes.quests, out ObservableQuests property))
     {
-        // Инициализация квестов пользователя
+        // Initialize player quests
     }
 }
 ```
 
-## QuestsModuleClient (Клиент)
+## QuestsModuleClient (Client)
 
 ```csharp
-// Получение списка доступных квестов
+// Get available quests
 questsClient.GetQuests((quests) => {
     foreach (var quest in quests)
     {
@@ -109,19 +109,19 @@ questsClient.GetQuests((quests) => {
     }
 });
 
-// Начать квест
+// Start a quest
 questsClient.StartQuest("quest_key", (isStarted, quest) => {
     if (isStarted)
         Debug.Log($"Started quest: {quest.Title}");
 });
 
-// Обновить прогресс квеста
+// Update quest progress
 questsClient.UpdateQuestProgress("quest_key", 5, (isUpdated) => {
     if (isUpdated)
         Debug.Log("Quest progress updated");
 });
 
-// Отменить квест
+// Cancel a quest
 questsClient.CancelQuest("quest_key", (isCanceled) => {
     if (isCanceled)
         Debug.Log("Quest canceled");
@@ -160,33 +160,33 @@ var questData = new QuestData
     Title = "Collect Wood",
     Description = "Collect 10 pieces of wood",
     RequiredProgress = 10,
-    TimeToComplete = 60 // 60 минут на выполнение
+    TimeToComplete = 60 // 60 minutes to complete
 };
 ```
 
 ### Цепочки квестов
 ```csharp
-// Создание зависимостей между квестами
+// Creating dependencies between quests
 var mainQuest = ScriptableObject.CreateInstance<QuestData>();
 mainQuest.name = "MainQuest";
 
 var subQuest1 = ScriptableObject.CreateInstance<QuestData>();
 subQuest1.name = "SubQuest1";
-// Установка mainQuest как родительского для subQuest1
+// Set mainQuest as the parent for subQuest1
 
 var subQuest2 = ScriptableObject.CreateInstance<QuestData>();
 subQuest2.name = "SubQuest2";
-// Установка mainQuest как родительского для subQuest2
+// Set mainQuest as the parent for subQuest2
 
-// В родительском квесте указываем дочерние
+// Specify child quests in the parent
 // mainQuest.ChildrenQuests = new QuestData[] { subQuest1, subQuest2 };
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Создавайте осмысленные ключи квестов** для лучшей идентификации
-2. **Группируйте квесты** по тематическим базам данных
-3. **Определяйте реалистичные сроки** выполнения квестов
-4. **Используйте цепочки квестов** для создания сюжетных линий
-5. **Обеспечьте отказоустойчивость** при обработке квестов
-6. **Предоставляйте понятные сообщения** для каждого статуса квеста
+1. **Create meaningful quest keys** for better identification
+2. **Group quests** into thematic databases
+3. **Set realistic deadlines** for completing quests
+4. **Use quest chains** to build storylines
+5. **Ensure fault tolerance** when processing quests
+6. **Provide clear messages** for each quest status

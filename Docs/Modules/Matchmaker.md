@@ -1,55 +1,55 @@
 # Master Server Toolkit - Matchmaker
 
-## Описание
-Модуль для поиска игр, комнат и лобби по критериям, а также информации о доступных регионах серверов.
+## Description
+Module for searching games, rooms and lobbies by various criteria as well as retrieving information about available server regions.
 
-## Основные компоненты
+## Main Components
 
-### MatchmakerModule (Сервер)
+### MatchmakerModule (Server)
 ```csharp
-// Зависимости
+// Dependencies
 AddOptionalDependency<LobbiesModule>();
 AddOptionalDependency<RoomsModule>();
 AddOptionalDependency<SpawnersModule>();
 
-// Основные методы
-public void AddProvider(IGamesProvider provider) // Добавить провайдер игр
+// Core methods
+public void AddProvider(IGamesProvider provider) // Add game provider
 ```
 
-### MstMatchmakerClient (Клиент)
+### MstMatchmakerClient (Client)
 ```csharp
-// Поиск игр (без фильтров)
+// Find games (without filters)
 matchmaker.FindGames((games) => {
     Debug.Log($"Found {games.Count} games");
 });
 
-// Поиск игр с фильтрами
+// Find games with filters
 var filters = new MstProperties();
 filters.Set("minPlayers", 2);
 matchmaker.FindGames(filters, (games) => { });
 
-// Получение регионов
+// Get regions
 matchmaker.GetRegions((regions) => {
     // regions[0].Name, regions[0].Ip, regions[0].PingTime
 });
 ```
 
-## Ключевые структуры данных
+## Key Data Structures
 
 ### GameInfoPacket
 ```csharp
 public class GameInfoPacket
 {
-    public int Id { get; set; }                    // ID игры
-    public string Address { get; set; }            // Адрес подключения
-    public GameInfoType Type { get; set; }         // Тип (Room, Lobby, Custom)
-    public string Name { get; set; }               // Название
-    public string Region { get; set; }             // Регион
-    public bool IsPasswordProtected { get; set; }  // Требуется пароль
-    public int MaxPlayers { get; set; }            // Максимум игроков
-    public int OnlinePlayers { get; set; }         // Текущее число игроков
-    public List<string> OnlinePlayersList { get; } // Список игроков
-    public MstProperties Properties { get; set; }  // Доп. свойства
+    public int Id { get; set; }                    // Game ID
+    public string Address { get; set; }            // Connection address
+    public GameInfoType Type { get; set; }         // Type (Room, Lobby, Custom)
+    public string Name { get; set; }               // Name
+    public string Region { get; set; }             // Region
+    public bool IsPasswordProtected { get; set; }  // Requires password
+    public int MaxPlayers { get; set; }            // Max players
+    public int OnlinePlayers { get; set; }         // Current players
+    public List<string> OnlinePlayersList { get; } // Player list
+    public MstProperties Properties { get; set; }  // Additional properties
 }
 ```
 
@@ -57,15 +57,15 @@ public class GameInfoPacket
 ```csharp
 public class RegionInfo
 {
-    public string Name { get; set; }  // Название региона
-    public string Ip { get; set; }    // IP-адрес
-    public int PingTime { get; set; } // Пинг (мс)
+    public string Name { get; set; }  // Region name
+    public string Ip { get; set; }    // IP address
+    public int PingTime { get; set; } // Ping (ms)
 }
 ```
 
-## Пользовательские провайдеры игр
+## Custom Game Providers
 
-### Интерфейс IGamesProvider
+### IGamesProvider interface
 ```csharp
 public interface IGamesProvider
 {
@@ -73,7 +73,7 @@ public interface IGamesProvider
 }
 ```
 
-### Пример минимальной реализации
+### Minimal implementation example
 ```csharp
 public class CustomGamesProvider : MonoBehaviour, IGamesProvider
 {
@@ -81,7 +81,7 @@ public class CustomGamesProvider : MonoBehaviour, IGamesProvider
     
     public IEnumerable<GameInfoPacket> GetPublicGames(IPeer peer, MstProperties filters)
     {
-        // Фильтрация по региону
+        // Filter by region
         if (filters.Has("region"))
         {
             return games.Where(g => g.Region == filters.AsString("region"));
@@ -90,32 +90,32 @@ public class CustomGamesProvider : MonoBehaviour, IGamesProvider
         return games;
     }
     
-    // API для добавления/удаления игр
+    // API for adding/removing games
     public void AddGame(GameInfoPacket game) => games.Add(game);
     public void RemoveGame(int gameId) => games.RemoveAll(g => g.Id == gameId);
 }
 
-// Регистрация
+// Registration
 matchmaker.AddProvider(gameObject.AddComponent<CustomGamesProvider>());
 ```
 
-## Пример использования
+## Usage Example
 
-### Поиск игр с несколькими фильтрами
+### Searching for games with multiple filters
 ```csharp
 var filters = new MstProperties();
-filters.Set("region", "eu-west");     // Только европейский регион
-filters.Set("minPlayers", 1);         // С минимум 1 игроком
-filters.Set("gameMode", "deathmatch"); // Режим "deathmatch"
+filters.Set("region", "eu-west");     // Only the European region
+filters.Set("minPlayers", 1);         // At least 1 player
+filters.Set("gameMode", "deathmatch"); // "deathmatch" mode
 
 matchmaker.FindGames(filters, (games) =>
 {
-    // Найденные игры
+    // Found games
     foreach (var game in games)
     {
         Debug.Log($"{game.Name} - {game.OnlinePlayers}/{game.MaxPlayers}");
         
-        // Подключение к игре
+        // Connect to the game
         Mst.Client.Rooms.JoinRoom(game.Id, "", (successful, roomAccess) =>
         {
             if (successful)
@@ -125,13 +125,13 @@ matchmaker.FindGames(filters, (games) =>
 });
 ```
 
-### Выбор региона с лучшим пингом
+### Selecting the region with the best ping
 ```csharp
 matchmaker.GetRegions((regions) =>
 {
     if (regions.Count > 0)
     {
-        // Сортировка по пингу
+        // Sort by ping
         var bestRegion = regions.OrderBy(r => r.PingTime).First();
         PlayerPrefs.SetString("SelectedRegion", bestRegion.Name);
         
@@ -140,11 +140,11 @@ matchmaker.GetRegions((regions) =>
 });
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте осмысленные имена свойств** для фильтрации
-2. **Добавляйте категории** в Properties для лучшей организации фильтров
-3. **Обрабатывайте случай отсутствия игр** в клиентском коде
-4. **Сортируйте результаты** для улучшения пользовательского опыта
-5. **Кэшируйте список регионов** и результаты поиска при необходимости
-6. **Обновляйте список регионов** при запуске игры
+1. **Use meaningful property names** for filtering
+2. **Add categories** to Properties for better organization
+3. **Handle the absence of games** in client code
+4. **Sort results** to improve the user experience
+5. **Cache the region list** and search results if needed
+6. **Refresh the region list** when the game starts

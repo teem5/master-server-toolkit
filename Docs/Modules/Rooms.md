@@ -1,23 +1,23 @@
 # Master Server Toolkit - Rooms
 
-## Описание
-Модуль для регистрации, управления и предоставления доступа к игровым комнатам. Позволяет создавать публичные и приватные комнаты, управлять их параметрами и контролировать доступ игроков.
+## Description
+Module for registering, managing and providing access to game rooms. It allows creation of public and private rooms, adjustment of their parameters and control of player access.
 
 ## RoomsModule
 
-Основной класс для управления комнатами на master server.
+Main class for managing rooms on the master server.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Permissions")]
 [SerializeField] protected int registerRoomPermissionLevel = 0;
 ```
 
-## Регистрация комнаты
+## Room registration
 
-### С игрового сервера:
+### From the game server:
 ```csharp
-// Создание опций комнаты
+// Create room options
 var options = new RoomOptions
 {
     Name = "Epic Battle Arena",
@@ -25,17 +25,17 @@ var options = new RoomOptions
     RoomPort = 7777,
     MaxConnections = 16,
     IsPublic = true,
-    Password = "", // пустой для публичной комнаты
+    Password = "", // empty for a public room
     Region = "RU",
     CustomOptions = new MstProperties()
 };
 
-// Добавляем кастомные свойства
+// Add custom properties
 options.CustomOptions.Set("map", "forest_arena");
 options.CustomOptions.Set("gameMode", "battle_royale");
 options.CustomOptions.Set("difficulty", "hard");
 
-// Регистрация на master server
+// Register on the master server
 Mst.Server.Rooms.RegisterRoom(options, (room, error) =>
 {
     if (room != null)
@@ -83,24 +83,24 @@ public class GameServerManager : MonoBehaviour
 
 ### Обновление параметров:
 ```csharp
-// Изменение опций комнаты
+// Modify room options
 var newOptions = room.Options;
 newOptions.MaxConnections = 20;
 newOptions.CustomOptions.Set("gameState", "playing");
 
 Mst.Server.Rooms.SaveRoomOptions(room.RoomId, newOptions);
 
-// Управление игроками
+// Manage players
 room.AddPlayer(peerId, peer);
 room.RemovePlayer(peerId);
 
-// Получение списка игроков
+// Get the player list
 var players = room.Players.Values;
 ```
 
 ### Уничтожение комнаты:
 ```csharp
-// При завершении игры
+// When the game ends
 Mst.Server.Rooms.DestroyRoom(room.RoomId, (successful, error) =>
 {
     if (successful)
@@ -109,7 +109,7 @@ Mst.Server.Rooms.DestroyRoom(room.RoomId, (successful, error) =>
     }
 });
 
-// Автоматическое уничтожение при отключении
+// Automatic destruction on shutdown
 void OnApplicationQuit()
 {
     if (registeredRoom != null)
@@ -123,7 +123,7 @@ void OnApplicationQuit()
 
 ### Поиск и подключение:
 ```csharp
-// Поиск публичных комнат
+// Search for public rooms
 Mst.Client.Matchmaker.FindGames((games) =>
 {
     foreach (var game in games)
@@ -132,7 +132,7 @@ Mst.Client.Matchmaker.FindGames((games) =>
     }
 });
 
-// Подключение к конкретной комнате
+// Connect to a specific room
 var roomId = 12345;
 Mst.Client.Rooms.GetAccess(roomId, "", (access, error) =>
 {
@@ -145,7 +145,7 @@ Mst.Client.Rooms.GetAccess(roomId, "", (access, error) =>
 
 ### Подключение с паролем:
 ```csharp
-// Подключение к приватной комнате
+// Connect to a private room
 Mst.Client.Rooms.GetAccess(roomId, "secret_password", (access, error) =>
 {
     if (access != null)
@@ -160,7 +160,7 @@ Mst.Client.Rooms.GetAccess(roomId, "secret_password", (access, error) =>
 });
 ```
 
-## Интеграция с игровым сервером
+## Integration with the game server
 
 ### RoomServerManager:
 ```csharp
@@ -173,36 +173,36 @@ public class RoomServerManager : MonoBehaviour
     
     void Start()
     {
-        // Запуск сервера
+        // Start the server
         networkManager.StartServer();
         
-        // Регистрация комнаты
+        // Register the room
         RegisterRoom();
     }
     
     public override void OnServerConnect(NetworkConnectionToClient conn)
     {
-        // Проверка токена доступа
+        // Validate access token
         ValidatePlayerAccess(conn);
     }
     
     private void ValidatePlayerAccess(NetworkConnectionToClient conn)
     {
-        // Получение токена от клиента
+        // Get token from client
         string accessToken = GetTokenFromClient(conn);
         
-        // Проверка на master server
+        // Check with the master server
         Mst.Server.Rooms.ValidateAccess(currentRoom.RoomId, accessToken, (userData, error) =>
         {
             if (userData != null)
             {
-                // Доступ разрешен
+                // Access granted
                 acceptedPlayers[conn.connectionId] = userData;
                 Debug.Log($"Player {userData.Username} validated");
             }
             else
             {
-                // Отклонить подключение
+                // Reject connection
                 conn.Disconnect();
             }
         });
@@ -231,18 +231,18 @@ Mst.Client.Matchmaker.FindGames(filters, (games) =>
 });
 ```
 
-### Кастомная фильтрация:
+### Custom filtering:
 ```csharp
 // На стороне сервера - переопределение GetPublicRoomOptions
 public override MstProperties GetPublicRoomOptions(IPeer player, RegisteredRoom room, MstProperties playerFilters)
 {
     var roomData = base.GetPublicRoomOptions(player, room, playerFilters);
     
-    // Добавляем дополнительную информацию
+    // Add additional information
     roomData.Set("serverVersion", "1.2.3");
     roomData.Set("ping", CalculatePing(player, room));
     
-    // Скрываем некоторые данные
+    // Hide some data
     if (!IsAdminPlayer(player))
     {
         roomData.Remove("adminPort");
@@ -254,9 +254,9 @@ public override MstProperties GetPublicRoomOptions(IPeer player, RegisteredRoom 
 
 ## События комнат
 
-### Подписка на события:
+### Subscribing to events:
 ```csharp
-// На мастер сервере
+// On the master server
 roomsModule.OnRoomRegisteredEvent += (room) =>
 {
     Debug.Log($"New room registered: {room.Options.Name}");
@@ -269,7 +269,7 @@ roomsModule.OnRoomDestroyedEvent += (room) =>
     CleanupResources(room);
 };
 
-// В игровой комнате
+// In the game room
 room.OnPlayerJoinedEvent += (player) =>
 {
     SendWelcomeMessage(player);
@@ -343,13 +343,13 @@ public class RoomListUI : MonoBehaviour
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Всегда проверяйте токены доступа** на игровом сервере
-2. **Используйте кастомные свойства** для гибкой настройки комнат
-3. **Регистрируйте комнаты после старта сервера**
-4. **Обновляйте количество игроков** в реальном времени
-5. **Очищайте ресурсы** при уничтожении комнаты
-6. **Используйте пароли** для приватных комнат
-7. **Мониторьте статус комнат** для оптимизации ресурсов
-8. **Применяйте фильтры** для лучшего UX поиска комнат
+1. **Always validate access tokens** on the game server
+2. **Use custom properties** for flexible room configuration
+3. **Register rooms after the server starts**
+4. **Update player counts** in real time
+5. **Clean up resources** when destroying a room
+6. **Use passwords** for private rooms
+7. **Monitor room status** to optimize resources
+8. **Apply filters** for a better room search UX

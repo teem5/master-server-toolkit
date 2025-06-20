@@ -1,13 +1,13 @@
 # Master Server Toolkit - Notification
 
-## Описание
-Модуль уведомлений для отправки сообщений от сервера клиентам, с возможностью уведомления отдельных пользователей, групп в комнатах или всех подключенных пользователей.
+## Description
+Notification module for sending messages from the server to clients. It can notify individual users, groups within rooms, or all connected users.
 
 ## NotificationModule
 
-Основной серверный класс модуля уведомлений.
+Main server class of the notification module.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("General Settings")]
 [SerializeField, Tooltip("If true, notification module will subscribe to auth module, and automatically setup recipients when they log in")]
@@ -20,103 +20,103 @@ protected int notifyPermissionLevel = 1;
 private int maxPromisedMessages = 10;
 ```
 
-### Зависимости:
-- AuthModule (опционально) - для автоматического добавления пользователей в список получателей при входе в систему
-- RoomsModule (опционально) - для отправки уведомлений игрокам в комнатах
+### Dependencies:
+- AuthModule (optional) - automatically adds users to the recipient list when they log in
+- RoomsModule (optional) - used to send notifications to players in rooms
 
-## Основные методы
+## Core Methods
 
-### Отправка уведомлений:
+### Sending notifications:
 ```csharp
-// Получить модуль
+// Get the module
 var notificationModule = Mst.Server.Modules.GetModule<NotificationModule>();
 
-// Отправить всем пользователям
-notificationModule.NoticeToAll("Сервер будет перезагружен через 5 минут");
+// Send to all users
+notificationModule.NoticeToAll("The server will restart in 5 minutes");
 
-// Отправить всем и добавить в обещанные сообщения (новые пользователи также получат это уведомление при входе)
-notificationModule.NoticeToAll("Добро пожаловать в наш мир!", true);
+// Send to all and save as a promised message (new users will get it when they log in)
+notificationModule.NoticeToAll("Welcome to our world!", true);
 
-// Отправить конкретному пользователю (по ID пира)
-notificationModule.NoticeToRecipient(peerId, "Вы получили новое достижение");
+// Send to a specific user (by peer ID)
+notificationModule.NoticeToRecipient(peerId, "You earned a new achievement");
 
-// Отправить группе пользователей
+// Send to a group of users
 List<int> peerIds = new List<int> { 123, 456, 789 };
-notificationModule.NoticeToRecipients(peerIds, "Новое групповое задание доступно");
+notificationModule.NoticeToRecipients(peerIds, "A new group quest is available");
 
-// Отправить всем пользователям в комнате
-notificationModule.NoticeToRoom(roomId, new List<int>(), "Комната будет закрыта через 2 минуты");
+// Send to all users in the room
+notificationModule.NoticeToRoom(roomId, new List<int>(), "The room will close in 2 minutes");
 
-// Отправить всем в комнате, кроме указанных пользователей
+// Send to everyone in the room except specified users
 List<int> ignorePeerIds = new List<int> { 123 };
-notificationModule.NoticeToRoom(roomId, ignorePeerIds, "Игрок присоединился к комнате");
+notificationModule.NoticeToRoom(roomId, ignorePeerIds, "A player joined the room");
 ```
 
-### Управление получателями:
+### Managing recipients:
 ```csharp
-// Проверить наличие получателя
+// Check if a recipient exists
 bool hasUser = notificationModule.HasRecipient(userId);
 
-// Получить получателя
+// Get the recipient
 NotificationRecipient recipient = notificationModule.GetRecipient(userId);
 
-// Получить получателя безопасно
+// Try to get the recipient
 if (notificationModule.TryGetRecipient(userId, out NotificationRecipient recipient))
 {
-    // Отправить уведомление
-    recipient.Notify("Персональное сообщение");
+    // Send a notification
+    recipient.Notify("Personal message");
 }
 
-// Добавить получателя вручную
+// Add a recipient manually
 NotificationRecipient newRecipient = notificationModule.AddRecipient(userExtension);
 
-// Удалить получателя
+// Remove a recipient
 notificationModule.RemoveRecipient(userId);
 ```
 
 ## Клиентская часть - MstNotificationClient
 
 ```csharp
-// Получить клиент
+// Get the client
 var notificationClient = Mst.Client.Notifications;
 
-// Подписаться на уведомления
+// Subscribe to notifications
 notificationClient.Subscribe((isSuccess, error) =>
 {
     if (isSuccess)
     {
-        Debug.Log("Успешно подписались на уведомления");
+        Debug.Log("Successfully subscribed to notifications");
     }
     else
     {
-        Debug.LogError($"Ошибка подписки на уведомления: {error}");
+        Debug.LogError($"Failed to subscribe to notifications: {error}");
     }
 });
 
-// Подписаться на событие получения уведомления
+// Subscribe to the notification received event
 notificationClient.OnNotificationReceivedEvent += OnNotificationReceived;
 
-// Обработчик уведомлений
+// Notification handler
 private void OnNotificationReceived(string message)
 {
-    // Показать уведомление пользователю
+    // Show notification to the user
     uiNotificationManager.ShowNotification(message);
 }
 
-// Отписаться от уведомлений
+// Unsubscribe from notifications
 notificationClient.Unsubscribe((isSuccess, error) =>
 {
     if (isSuccess)
     {
-        Debug.Log("Успешно отписались от уведомлений");
+        Debug.Log("Successfully unsubscribed from notifications");
     }
     else
     {
-        Debug.LogError($"Ошибка отписки от уведомлений: {error}");
+        Debug.LogError($"Error unsubscribing from notifications: {error}");
     }
 });
 
-// Отписаться от события
+// Unsubscribe from the event
 notificationClient.OnNotificationReceivedEvent -= OnNotificationReceived;
 ```
 
@@ -342,17 +342,17 @@ public class RoomManager : MonoBehaviour, IRoomManager
 notificationModule.NoticeToAll("Новое обновление игры! Версия 1.2.0 доступна!", true);
 ```
 
-Настройка количества сохраняемых обещанных сообщений:
+Configuring how many promised messages are stored:
 ```csharp
 [SerializeField] private int maxPromisedMessages = 10;
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Разделяйте типы уведомлений** - используйте различные форматирование или префиксы для различных типов уведомлений
-2. **Используйте JSON для сложных уведомлений** - когда требуется передать структурированные данные
-3. **Управляйте уровнями доступа** - настройте `notifyPermissionLevel` для ограничения возможности отправки уведомлений
-4. **Интегрируйте с другими модулями** - используйте события из других модулей для отправки уведомлений
-5. **Создавайте фильтры уведомлений** на клиенте - позволяйте пользователям настраивать, какие уведомления им показывать
-6. **Не злоупотребляйте обещанными сообщениями** - сохраняйте как обещанные только действительно важные системные сообщения
-7. **Используйте локализацию** для интернациональных проектов
+1. **Separate notification types** – use different formatting or prefixes for various kinds of messages
+2. **Use JSON for complex notifications** when structured data is required
+3. **Manage permission levels** – configure `notifyPermissionLevel` to restrict who can send notifications
+4. **Integrate with other modules** – trigger notifications from other modules' events
+5. **Create notification filters** on the client so users can choose what they want to see
+6. **Do not overuse promised messages** – reserve them for truly important system announcements
+7. **Provide localization** for international projects

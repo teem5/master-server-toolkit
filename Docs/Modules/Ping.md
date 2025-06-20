@@ -1,34 +1,34 @@
 # Master Server Toolkit - Ping
 
-## Описание
-Модуль Ping для проверки соединения между клиентом и сервером, измерения задержки и тестирования доступности сервера.
+## Description
+Ping module for checking the connection between client and server, measuring latency and testing server availability.
 
 ## PingModule
 
-Основной класс модуля Ping.
+Core class of the Ping module.
 
-### Настройка:
+### Setup:
 ```csharp
 [SerializeField, TextArea(3, 5)]
 private string pongMessage = "Hello, Pong!";
 ```
 
-### Свойства:
+### Properties:
 ```csharp
 public string PongMessage { get; set; }
 ```
 
 ## Использование на сервере
 
-### Инициализация:
+### Initialization:
 ```csharp
-// Модуль автоматически регистрирует обработчик сообщений Ping
+// The module automatically registers a Ping message handler
 public override void Initialize(IServer server)
 {
     server.RegisterMessageHandler(MstOpCodes.Ping, OnPingRequestListener);
 }
 
-// Обработчик пинг-запросов
+// Ping request handler
 private Task OnPingRequestListener(IIncomingMessage message)
 {
     message.Respond(pongMessage, ResponseStatus.Success);
@@ -36,28 +36,28 @@ private Task OnPingRequestListener(IIncomingMessage message)
 }
 ```
 
-### Настройка сообщения Pong:
+### Configuring the Pong message:
 ```csharp
-// Получение модуля
+// Get the module
 var pingModule = Mst.Server.Modules.GetModule<PingModule>();
 
-// Установка сообщения
+// Set the message
 pingModule.PongMessage = "Game server is running!";
 ```
 
-## Использование на клиенте
+## Client Usage
 
-### Отправка Ping:
+### Sending a Ping:
 ```csharp
-// Отправка пинг-запроса
+// Send a ping request
 Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
 {
     if (status == ResponseStatus.Success)
     {
-        // Получаем сообщение от сервера
+        // Receive message from the server
         string pongMessage = response.AsString();
         
-        // Вычисляем время отклика (RTT - Round Trip Time)
+        // Calculate the round trip time (RTT)
         float rtt = response.TimeElapsedSinceRequest;
         
         Debug.Log($"Ping successful. RTT: {rtt}ms. Message: {pongMessage}");
@@ -69,7 +69,7 @@ Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
 });
 ```
 
-### Реализация периодического пинга:
+### Periodic ping implementation:
 ```csharp
 public class PingTester : MonoBehaviour
 {
@@ -94,10 +94,10 @@ public class PingTester : MonoBehaviour
         {
             if (status == ResponseStatus.Success)
             {
-                // Сброс счётчика неудачных попыток
+                // Reset the failed attempts counter
                 failedPingsCount = 0;
                 
-                // Обновление отображения пинга в UI
+                // Update ping display in the UI
                 float rtt = response.TimeElapsedSinceRequest;
                 UpdatePingDisplay(rtt);
             }
@@ -107,7 +107,7 @@ public class PingTester : MonoBehaviour
                 
                 if (failedPingsCount >= maxFailedPings)
                 {
-                    // Обработка потери соединения
+                    // Handle connection loss
                     HandleConnectionLost();
                 }
             }
@@ -116,14 +116,14 @@ public class PingTester : MonoBehaviour
     
     private void UpdatePingDisplay(float rtt)
     {
-        // Пример обновления UI
+        // Example of updating the UI
         // pingText.text = $"Ping: {Mathf.RoundToInt(rtt)}ms";
     }
     
     private void HandleConnectionLost()
     {
         Debug.LogWarning("Connection to server lost!");
-        // Обработка потери соединения с сервером
+        // Handle server connection loss
     }
 }
 ```
@@ -140,7 +140,7 @@ public class EnhancedPingModule : PingModule
     
     private Task OnPingRequestListener(IIncomingMessage message)
     {
-        // Создаем расширенный ответ с дополнительной информацией
+        // Create an extended response with additional information
         var pingResponse = new PingResponseInfo
         {
             Message = PongMessage,
@@ -150,15 +150,15 @@ public class EnhancedPingModule : PingModule
             OnlinePlayers = Mst.Server.ConnectionsCount
         };
         
-        // Преобразуем в JSON
+        // Convert to JSON
         string jsonResponse = JsonUtility.ToJson(pingResponse);
         
-        // Отправляем ответ
+        // Send the response
         message.Respond(jsonResponse, ResponseStatus.Success);
         return Task.CompletedTask;
     }
     
-    // Обновление информации о нагрузке
+    // Update server load information
     public void UpdateServerLoad(int currentLoad)
     {
         serverCurrentLoad = currentLoad;
@@ -191,20 +191,20 @@ Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
             // Парсинг JSON-ответа
             PingResponseInfo pingInfo = JsonUtility.FromJson<PingResponseInfo>(jsonResponse);
             
-            // Использование информации
+            // Use the information
             Debug.Log($"Server message: {pingInfo.Message}");
             Debug.Log($"Server time: {new System.DateTime(pingInfo.ServerTime)}");
             Debug.Log($"Server load: {pingInfo.ServerLoad}/{pingInfo.MaxServerLoad}");
             Debug.Log($"Online players: {pingInfo.OnlinePlayers}");
             
-            // Расчёт разницы во времени между клиентом и сервером
+            // Calculate time difference between client and server
             long clientTime = System.DateTime.UtcNow.Ticks;
             TimeSpan timeDifference = new System.DateTime(pingInfo.ServerTime) - new System.DateTime(clientTime);
             Debug.Log($"Time difference: {timeDifference.TotalMilliseconds}ms");
         }
         catch
         {
-            // Если ответ в старом формате, обрабатываем как строку
+            // If the response is in the old format, handle it as a string
             Debug.Log($"Server message: {jsonResponse}");
         }
     }
@@ -249,22 +249,22 @@ public class ConnectionMonitor : MonoBehaviour
             {
                 float rtt = response.TimeElapsedSinceRequest;
                 
-                // Добавляем в историю
+                // Add to history
                 pingsHistory.Add(rtt);
                 
-                // Поддерживаем ограниченный размер истории
+                // Keep history size limited
                 if (pingsHistory.Count > historySize)
                 {
                     pingsHistory.RemoveAt(0);
                 }
                 
-                // Проверка на высокий пинг
+                // Check for high ping
                 if (rtt > maxPingTime)
                 {
                     OnHighPingDetected(rtt);
                 }
                 
-                // Уведомление о среднем пинге
+                // Notify about average ping
                 float averagePing = pingsHistory.Average();
                 OnPingUpdated(rtt, averagePing);
             }
@@ -275,25 +275,25 @@ public class ConnectionMonitor : MonoBehaviour
         });
     }
     
-    // События для интеграции с игровыми системами
+    // Events for integration with game systems
     private void OnPingUpdated(float currentPing, float averagePing)
     {
-        // Обновление UI или состояния игры
+        // Update the UI or game state
     }
     
     private void OnHighPingDetected(float ping)
     {
-        // Предупреждение игрока о плохом соединении
+        // Warn the player about poor connection
     }
     
     private void OnPingFailed()
     {
-        // Обработка неудачной попытки пинга
+        // Handle a failed ping attempt
     }
 }
 ```
 
-### Автоматическое переподключение:
+### Automatic reconnection:
 ```csharp
 public class AutoReconnector : MonoBehaviour
 {
@@ -315,12 +315,12 @@ public class AutoReconnector : MonoBehaviour
         {
             if (Mst.Client.Connection.IsConnected)
             {
-                // Проверка соединения через пинг
+                // Check the connection with a ping
                 CheckConnection();
             }
             else if (reconnectAttempts < maxReconnectAttempts)
             {
-                // Попытка переподключения
+                // Attempt to reconnect
                 AttemptReconnect();
             }
             
@@ -334,7 +334,7 @@ public class AutoReconnector : MonoBehaviour
         {
             if (status == ResponseStatus.Success)
             {
-                // Соединение работает, сбрасываем счётчики
+                // Connection is alive, reset counters
                 failedPingsCount = 0;
                 reconnectAttempts = 0;
             }
@@ -374,12 +374,12 @@ public class AutoReconnector : MonoBehaviour
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте Ping для мониторинга состояния соединения** - периодические проверки помогают обнаружить проблемы раньше
-2. **Реализуйте автоматическое переподключение** при обнаружении потери соединения
-3. **Храните историю Ping** для анализа стабильности соединения
-4. **Отображайте пинг в UI** для информирования игроков о качестве соединения
-5. **Расширяйте базовый функционал** для передачи дополнительной информации о сервере
-6. **Установите разумные интервалы пинга** - слишком частые запросы могут создать дополнительную нагрузку
-7. **Адаптируйте геймплей** под текущее состояние соединения, например, уменьшайте количество отправляемых обновлений при высоком пинге
+1. **Use Ping to monitor connection status** – periodic checks help detect issues early
+2. **Implement automatic reconnection** when a connection loss is detected
+3. **Keep a ping history** to analyze connection stability
+4. **Display ping in the UI** to inform players about connection quality
+5. **Extend the base functionality** to send additional server information
+6. **Set reasonable ping intervals** – requests that are too frequent may create extra load
+7. **Adapt gameplay** to the connection state, e.g. reduce update frequency on high ping
