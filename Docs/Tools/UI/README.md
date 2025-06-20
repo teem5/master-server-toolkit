@@ -1,57 +1,57 @@
 # Master Server Toolkit - UI Framework
 
-## Обзор
+## Overview
 
-UI фреймворк в Master Server Toolkit предоставляет гибкую систему для создания и управления пользовательским интерфейсом в многопользовательских играх. Фреймворк построен вокруг концепции **Views** (Представлений), которые представляют собой самостоятельные UI компоненты с возможностью анимации, валидации и модульного расширения.
+The UI framework in Master Server Toolkit provides a flexible system for creating and managing user interfaces in multiplayer games. The framework is built around the concept of **Views**, which are independent UI components that can be animated, validated and extended in a modular way.
 
-## Основные компоненты
+## Main Components
 
 ### [Views System](Views.md)
-Система представлений, включающая базовые классы для управления UI экранами, окнами и панелями.
+The views system includes base classes for managing UI screens, windows and panels.
 
 ### [UI Components](Components.md)
-Компоненты для отображения данных, свойств, прогресс-баров и других элементов интерфейса.
+Components for displaying data, properties, progress bars and other interface elements.
 
 ### [Validation System](Validation.md)
-Система валидации пользовательского ввода с поддержкой проверки полей с помощью регулярных выражений.
+A validation system for user input with support for checking fields using regular expressions.
 
-## Интеграция с MasterServerToolkit
+## Integration with MasterServerToolkit
 
-UI фреймворк тесно интегрирован с другими модулями MasterServerToolkit:
+The UI framework is tightly integrated with other MasterServerToolkit modules:
 
-- **Authentication UI**: Простое создание форм регистрации и входа
-- **Lobbies UI**: Интерфейсы для лобби и комнат
-- **Matchmaking UI**: Компоненты для поиска игры и подбора матчей
-- **Chat UI**: Интерфейсы чата и сообщений
+ - **Authentication UI**: Simple creation of registration and login forms
+ - **Lobbies UI**: Interfaces for lobbies and rooms
+ - **Matchmaking UI**: Components for finding games and creating matches
+ - **Chat UI**: Interfaces for chat and messaging
 
-## Начало работы
+## Getting Started
 
-Для использования UI фреймворка:
+To use the UI framework:
 
-1. Добавьте в вашу сцену `ViewsManager` компонент
-2. Создайте UI представления унаследовав их от `UIView` класса
-3. Зарегистрируйте представления с уникальными ID
-4. Используйте `ViewsManager.Show()` и `ViewsManager.Hide()` для управления представлениями
+1. Add the `ViewsManager` component to your scene
+2. Create UI views by inheriting them from the `UIView` class
+3. Register the views with unique IDs
+4. Use `ViewsManager.Show()` and `ViewsManager.Hide()` to control the views
 
 ```csharp
-// Получение представления по ID
+// Get view by ID
 var loginView = ViewsManager.GetView<UIView>("LoginView");
 
-// Показ представления
+// Show the view
 loginView.Show();
 
-// Скрытие всех представлений
+// Hide all views
 ViewsManager.HideAllViews();
 ```
 
-## Пример использования
+## Example Usage
 
 ```csharp
-// Автоматическое отображение UI при входе игрока
+// Automatically show UI when a player logs in
 authModule.OnUserLoggedInEvent += (user) => {
-    // Скрываем экран логина
+    // Hide the login screen
     ViewsManager.Hide("LoginView");
-    // Показываем главное меню
+    // Show the main menu
     ViewsManager.Show("MainMenuView");
 };
 ```

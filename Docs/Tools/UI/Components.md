@@ -1,22 +1,22 @@
 # Master Server Toolkit - UI Components
 
-## Обзор
+## Overview
 
-UI компоненты в Master Server Toolkit предоставляют готовые решения для отображения данных, настраиваемых свойств, прогресс-баров и многого другого. Они созданы для простой интеграции с системой представлений и упрощения создания сложных пользовательских интерфейсов.
+The UI components in Master Server Toolkit provide ready-made solutions for displaying data, configurable properties, progress bars and much more. They are created for easy integration with the views system and simplify building complex user interfaces.
 
-## Ключевые компоненты
+## Key Components
 
 ### UIProperty
 
-Универсальный компонент для отображения именованных свойств с возможностью задания иконки, значения и прогресс-бара:
+A universal component for displaying named properties with the ability to set an icon, value and progress bar:
 
 ```csharp
 public class UIProperty : MonoBehaviour
 {
-    // Форматы вывода значений (F0 - F5)
+    // Value display formats (F0 - F5)
     public enum UIPropertyValueFormat { F0, F1, F2, F3, F4, F5 }
     
-    // Компоненты
+    // Components
     [SerializeField] protected Image iconImage;
     [SerializeField] protected TextMeshProUGUI lableText;
     [SerializeField] protected TextMeshProUGUI valueText;
@@ -24,7 +24,7 @@ public class UIProperty : MonoBehaviour
     [SerializeField] protected Color minColor = Color.red;
     [SerializeField] protected Color maxColor = Color.green;
     
-    // Настройки
+    // Settings
     [SerializeField] protected string id = "propertyId";
     [SerializeField] protected float minValue = 0f;
     [SerializeField] protected float currentValue = 50f;
@@ -35,7 +35,7 @@ public class UIProperty : MonoBehaviour
     [SerializeField] protected UIPropertyValueFormat formatValue = UIPropertyValueFormat.F1;
     [SerializeField] protected bool invertValue = false;
     
-    // Методы установки значений
+    // Methods for setting values
     public void SetMin(float value);
     public void SetMax(float value);
     public void SetValue(float value);
@@ -44,18 +44,18 @@ public class UIProperty : MonoBehaviour
 
 ### UIProgressBar
 
-Упрощенная версия UIProperty, сфокусированная на отображении прогресса:
+A simplified version of UIProperty focused on displaying progress:
 
 ```csharp
 public class UIProgressBar : UIProperty
 {
-    // Специализированная версия со специфичной логикой отображения прогресса
+    // Specialized version with specific logic for displaying progress
 }
 ```
 
 ### UIProgressProperty
 
-Компонент для связывания прогресс-бара с динамически меняющимся свойством:
+A component for binding a progress bar to a dynamically changing property:
 
 ```csharp
 public class UIProgressProperty : MonoBehaviour
@@ -64,13 +64,13 @@ public class UIProgressProperty : MonoBehaviour
     [SerializeField] protected float updateInterval = 0.2f;
     [SerializeField] protected UnityEvent<float> onValueChangedEvent;
     
-    // Связывание с источником значения и автоматическое обновление
+    // Bind to a value source and update automatically
 }
 ```
 
 ### UILable
 
-Компонент для работы с текстовыми метками:
+Component for working with text labels:
 
 ```csharp
 public class UILable : MonoBehaviour
@@ -93,13 +93,13 @@ public class UIMultiLable : MonoBehaviour
     [SerializeField] protected string text = "";
     [SerializeField] protected List<TextMeshProUGUI> labels;
     
-    // Синхронизирует текст для группы меток
+    // Synchronizes text for a group of labels
 }
 ```
 
 ### DataTableLayoutGroup
 
-Компонент для создания табличного представления данных:
+Component for creating a table representation of data:
 
 ```csharp
 public class DataTableLayoutGroup : MonoBehaviour
@@ -110,16 +110,16 @@ public class DataTableLayoutGroup : MonoBehaviour
     [SerializeField] protected float spacing = 2f;
     [SerializeField] protected Vector2 cellSize = new Vector2(100f, 30f);
     
-    // Методы для создания и наполнения таблицы
+    // Methods for creating and filling the table
     public void SetValue(int row, int column, string value);
     public void Clear();
     public void Rebuild(int rows, int columns);
 }
 ```
 
-## Пример использования
+## Example Usage
 
-### Отображение статистики игрока
+### Displaying player statistics
 
 ```csharp
 public class PlayerStatsView : UIView
@@ -134,7 +134,7 @@ public class PlayerStatsView : UIView
     {
         this.player = player;
         
-        // Настройка свойств
+        // Set up properties
         healthProperty.SetMin(0);
         healthProperty.SetMax(player.maxHealth);
         healthProperty.SetValue(player.currentHealth);
@@ -147,7 +147,7 @@ public class PlayerStatsView : UIView
         experienceProperty.SetMax(player.experienceToNextLevel);
         experienceProperty.SetValue(player.currentExperience);
         
-        // Подписка на обновления
+        // Subscribe to updates
         player.OnHealthChanged += (newValue) => healthProperty.SetValue(newValue);
         player.OnManaChanged += (newValue) => manaProperty.SetValue(newValue);
         player.OnExperienceChanged += (newValue) => experienceProperty.SetValue(newValue);
@@ -155,7 +155,7 @@ public class PlayerStatsView : UIView
 }
 ```
 
-### Создание таблицы лидеров
+### Creating a leaderboard
 
 ```csharp
 public class LeaderboardView : UIView
@@ -164,15 +164,15 @@ public class LeaderboardView : UIView
     
     public void PopulateLeaderboard(List<PlayerScore> scores)
     {
-        // Создание таблицы размером по количеству игроков и 3 колонки
+        // Create a table with a size equal to the number of players and 3 columns
         dataTable.Rebuild(scores.Count, 3);
         
-        // Заполнение заголовков
+        // Fill the headers
         dataTable.SetValue(0, 0, "Ранг");
         dataTable.SetValue(0, 1, "Игрок");
         dataTable.SetValue(0, 2, "Счет");
         
-        // Заполнение данных игроков
+        // Fill player data
         for (int i = 0; i < scores.Count; i++)
         {
             dataTable.SetValue(i + 1, 0, (i + 1).ToString());
@@ -183,7 +183,7 @@ public class LeaderboardView : UIView
 }
 ```
 
-### Прогресс-бар загрузки
+### Loading progress bar
 
 ```csharp
 public class LoadingScreen : UIView
@@ -197,17 +197,17 @@ public class LoadingScreen : UIView
         statusLabel.Text = status;
     }
     
-    // Использование:
-    // loadingScreen.UpdateProgress(0.5f, "Загрузка активов...");
+    // Usage:
+    // loadingScreen.UpdateProgress(0.5f, "Loading assets...");
 }
 ```
 
-## Рекомендации по использованию
+## Usage Recommendations
 
-1. **Именование свойств**: Присваивайте уникальные ID свойствам для удобного доступа к ним
-2. **Анимация переходов**: Используйте `smoothValue = true` для плавного изменения значений
-3. **Форматирование**: Подбирайте подходящий `formatValue` для читаемого вывода чисел
-4. **Инверсия**: Используйте `invertValue` для инвертирования прогресс-баров (например, для урона)
-5. **Реактивность**: Подписывайтесь на события изменения данных для автоматического обновления UI
+1. **Naming properties**: Assign unique IDs to properties for easy access
+2. **Transition animation**: Use `smoothValue = true` for smooth value changes
+3. **Formatting**: Choose an appropriate `formatValue` for readable numbers
+4. **Inversion**: Use `invertValue` to invert progress bars (for example, for damage)
+5. **Reactivity**: Subscribe to data change events to automatically update the UI
 
-UI компоненты в Master Server Toolkit предназначены для работы как самостоятельно, так и в составе более сложных представлений. Они предоставляют базовую функциональность, которую можно расширять и настраивать под конкретные нужды проекта.
+The UI components in Master Server Toolkit are intended to work both on their own and as part of more complex views. They provide basic functionality that can be extended and customized for the specific needs of your project.
