@@ -1,13 +1,13 @@
 # Master Server Toolkit - Profiles
 
-## Описание
-Модуль профилей для управления пользовательскими данными, наблюдения за изменениями и синхронизации между клиентами и серверами.
+## Description
+Profiles module for managing user data, tracking changes and synchronizing between clients and servers.
 
 ## ProfilesModule
 
-Основной класс для управления профилями пользователей.
+Main class for managing user profiles.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("General Settings")]
 [SerializeField] protected int unloadProfileAfter = 20;
@@ -26,21 +26,21 @@ public DatabaseAccessorFactory databaseAccessorFactory;
 
 ## Свойства профиля
 
-### Создание системы свойств:
+### Creating the property system:
 ```csharp
-// Создание популятора
+// Create a populator
 public class PlayerStatsPopulator : IObservablePropertyPopulator
 {
     public IProperty Populate()
     {
         var properties = new ObservableBase();
         
-        // Базовые статы
+        // Basic stats
         properties.Set("playerLevel", new ObservableInt(1));
         properties.Set("experience", new ObservableInt(0));
         properties.Set("coins", new ObservableInt(0));
         
-        // Словарь для инвентаря
+        // Inventory dictionary
         var inventory = new ObservableDictStringInt();
         inventory.Add("sword", 1);
         inventory.Add("potion", 5);
@@ -51,65 +51,65 @@ public class PlayerStatsPopulator : IObservablePropertyPopulator
 }
 ```
 
-## Работа с профилями
+## Working with profiles
 
-### Доступ к профилю (клиент):
+### Accessing a profile (client):
 ```csharp
-// Запрос профиля
+// Request profile
 Mst.Client.Connection.SendMessage(MstOpCodes.ClientFillInProfileValues);
 
-// Подписка на обновления
+// Subscribe to updates
 Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.UpdateClientProfile, OnProfileUpdated);
 
-// Обработка ответа
+// Handle the response
 private void OnProfileUpdated(IIncomingMessage message)
 {
     var profile = new ObservableProfile();
     profile.FromBytes(message.AsBytes());
     
-    // Доступ к свойствам
+    // Access properties
     int level = profile.GetProperty<ObservableInt>("playerLevel").Value;
     int coins = profile.GetProperty<ObservableInt>("coins").Value;
 }
 ```
 
-### Доступ к профилю (сервер):
+### Accessing a profile (server):
 ```csharp
-// Получение профиля по Id
+// Get profile by ID
 var profile = profilesModule.GetProfileByUserId(userId);
 
-// Получение профиля по Peer
+// Get profile by peer
 var profile = profilesModule.GetProfileByPeer(peer);
 
-// Изменение профиля
+// Modify profile
 profile.GetProperty<ObservableInt>("playerLevel").Add(1);
 profile.GetProperty<ObservableInt>("coins").Set(100);
 ```
 
-## События профиля
+## Profile events
 
-### Подписка на изменения:
+### Subscribing to changes:
 ```csharp
-// На сервере
+// On the server
 profilesModule.OnProfileCreated += OnProfileCreated;
 profilesModule.OnProfileLoaded += OnProfileLoaded;
 
-// В профиле
+// In the profile
 profile.OnModifiedInServerEvent += OnProfileChanged;
 
-// Конкретное свойство
+// Specific property
 profile.GetProperty<ObservableInt>("playerLevel").OnDirtyEvent += OnLevelChanged;
 ```
 
-## Синхронизация с базой данных
+## Database synchronization
 
-### Реализация IProfilesDatabaseAccessor:
+### IProfilesDatabaseAccessor implementation:
 ```csharp
 public class ProfilesDatabaseAccessor : IProfilesDatabaseAccessor
 {
     public async Task RestoreProfileAsync(ObservableServerProfile profile)
     {
-        // Загрузка из БД
+        // Load from DB
         var data = await LoadProfileDataFromDB(profile.UserId);
         if (data != null)
         {
@@ -119,7 +119,7 @@ public class ProfilesDatabaseAccessor : IProfilesDatabaseAccessor
     
     public async Task UpdateProfilesAsync(List<ObservableServerProfile> profiles)
     {
-        // Batch сохранение в БД
+        // Batch save to DB
         foreach (var profile in profiles)
         {
             await SaveProfileToDB(profile.UserId, profile.ToBytes());
@@ -130,20 +130,20 @@ public class ProfilesDatabaseAccessor : IProfilesDatabaseAccessor
 
 ## Типы наблюдаемых свойств
 
-### Базовые типы:
+### Basic types:
 ```csharp
-// Числовые
+// Numbers
 ObservableInt level = new ObservableInt(10);
 ObservableFloat health = new ObservableFloat(100.0f);
 
-// Строки
+// Strings
 ObservableString name = new ObservableString("Player");
 
-// Списки
+// Lists
 ObservableListInt scores = new ObservableListInt();
 scores.Add(100);
 
-// Словари
+// Dictionaries
 ObservableDictStringInt items = new ObservableDictStringInt();
 items.Add("sword", 1);
 ```
@@ -159,36 +159,36 @@ updates.Properties = new MstProperties();
 updates.Properties.Set("playerLevel", 15);
 updates.Properties.Set("experience", 1500);
 
-// Отправка на master server
+// Send to the master server
 Mst.Server.Connection.SendMessage(MstOpCodes.ServerUpdateProfileValues, updates);
 ```
 
-## Производительность и оптимизация
+## Performance and optimization
 
-### Debounce настройки:
+### Debounce settings:
 ```csharp
-// Задержка сохранения в БД (секунды)
+// Delay before saving to DB (seconds)
 saveProfileDebounceTime = 1;
 
-// Задержка отправки обновлений клиенту
+// Delay before sending updates to the client
 clientUpdateDebounceTime = 0.5f;
 
-// Время до выгрузки профиля после выхода
+// Time until a profile is unloaded after leaving
 unloadProfileAfter = 20;
 ```
 
-### Ограничения:
+### Limitations:
 ```csharp
-// Максимальный размер обновления
+// Maximum update size
 maxUpdateSize = 1048576;
 
-// Тайм-аут загрузки профиля
+// Profile load timeout
 profileLoadTimeoutSeconds = 10;
 ```
 
 ## Примеры использования
 
-### Игровая статистика:
+### Gameplay statistics:
 ```csharp
 public class PlayerStats
 {
@@ -218,13 +218,13 @@ public class PlayerStats
     private void LevelUp()
     {
         Level.Add(1);
-        Health.Set(100.0f); // Восстановление здоровья при уровне
+        Health.Set(100.0f); // Restore health on level up
         Experience.Set(0);
     }
 }
 ```
 
-### Клиентский профиль:
+### Client profile:
 ```csharp
 public class ProfileUI : MonoBehaviour
 {
@@ -237,10 +237,10 @@ public class ProfileUI : MonoBehaviour
     
     void Start()
     {
-        // Запрос профиля
+        // Request profile
         Mst.Client.Connection.SendMessage(MstOpCodes.ClientFillInProfileValues);
         
-        // Регистрация обработчика обновлений
+        // Register update handler
         Mst.Client.Connection.RegisterMessageHandler(MstOpCodes.UpdateClientProfile, OnProfileUpdate);
     }
     
@@ -251,7 +251,7 @@ public class ProfileUI : MonoBehaviour
             
         profile.ApplyUpdates(message.AsBytes());
         
-        // Обновление UI
+        // Update UI
         UpdateUI();
     }
     
@@ -264,13 +264,13 @@ public class ProfileUI : MonoBehaviour
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте популяторы** для инициализации профилей
-2. **Группируйте обновления** для снижения нагрузки
-3. **Настройте debounce** для оптимизации производительности
-4. **Проверяйте размер обновлений** для предотвращения атак
-5. **Используйте типизированные свойства** для безопасности
-6. **Подписывайтесь на события** для реактивного программирования
-7. **Очищайте неиспользуемые профили** для освобождения памяти
-8. **Реализуйте резервное копирование** для важных данных
+1. **Use populators** to initialize profiles
+2. **Group updates** to reduce load
+3. **Configure debounce** to optimize performance
+4. **Check update size** to prevent attacks
+5. **Use typed properties** for safety
+6. **Subscribe to events** for reactive programming
+7. **Clean up unused profiles** to free memory
+8. **Implement backups** for important data

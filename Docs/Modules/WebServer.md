@@ -1,13 +1,13 @@
 # Master Server Toolkit - Web Server
 
-## Описание
-Модуль WebServer предоставляет встроенный HTTP-сервер для управления игровым сервером через веб-интерфейс, API и мониторинга системы. Позволяет создавать RESTful API для внешних сервисов и админ-панель.
+## Description
+WebServer module provides a built-in HTTP server for managing the game server via web interface, API and system monitoring. It allows creating RESTful APIs for external services and an admin panel.
 
 ## WebServerModule
 
-Основной класс модуля веб-сервера.
+Main class of the web server module.
 
-### Настройка:
+### Setup:
 ```csharp
 [Header("Http Server Settings")]
 [SerializeField] protected bool autostart = true;
@@ -565,15 +565,15 @@ public class WebhookManager : MonoBehaviour
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте контроллеры для организации логики** - группируйте связанные обработчики в контроллеры
-2. **Включайте авторизацию для админ-функций** - использование `UseCredentials = true` для защищенных маршрутов
-3. **Обрабатывайте ошибки и возвращайте правильные HTTP-коды** - используйте классы результатов (BadRequest, NotFound и т.д.)
-4. **Валидируйте входные данные** - всегда проверяйте параметры запроса и тело перед использованием
-5. **Создавайте документацию API** - описывайте доступные маршруты, параметры и результаты
-6. **Разделяйте чтение и изменение** - используйте GET для чтения, POST/PUT/DELETE для изменения
-7. **Настройте CORS если необходимо** - для доступа с внешних веб-приложений
-8. **Ограничивайте доступ по IP** - для критически важных API
-9. **Используйте JSON для обмена данными** - предпочтительнее других форматов
-10. **Имплементируйте отслеживание статистики API** - для мониторинга использования и производительности
+1. **Use controllers to organize logic** – group related handlers into controllers
+2. **Enable authorization for admin functions** – set `UseCredentials = true` on protected routes
+3. **Handle errors and return correct HTTP codes** – use result classes like BadRequest, NotFound, etc.
+4. **Validate input data** – always check request parameters and body before use
+5. **Create API documentation** – describe available routes, parameters and results
+6. **Separate read and write operations** – use GET for reads, POST/PUT/DELETE for changes
+7. **Configure CORS if necessary** – for access from external web apps
+8. **Restrict access by IP** – for critical APIs
+9. **Use JSON for data exchange** – preferred over other formats
+10. **Implement API statistics tracking** – monitor usage and performance

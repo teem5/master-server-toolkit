@@ -1,18 +1,18 @@
 # Master Server Toolkit - World Rooms
 
-## Описание
-Модуль WorldRooms расширяет функциональность базового модуля Rooms для создания постоянных игровых зон (локаций) в открытом мире, с возможностью автоматического запуска и управления ими.
+## Description
+The WorldRooms module extends the basic Rooms module to create persistent game areas (locations) in an open world with automatic launching and management.
 
-## Основные компоненты
+## Main Components
 
 ### WorldRoomsModule
 ```csharp
-// Настройки
+// Settings
 [Header("Zones Settings"), SerializeField]
-private string[] zoneScenes; // Сцены зон, которые будут автоматически запущены
+private string[] zoneScenes; // Zone scenes that will be started automatically
 
-// Зависимости
-protected SpawnersModule spawnersModule; // Для запуска серверов зон
+// Dependencies
+protected SpawnersModule spawnersModule; // For launching zone servers
 ```
 
 ## Автоматическое создание зон мира
@@ -41,9 +41,9 @@ protected virtual MstProperties SpawnerProperties(string zoneId)
 {
     var properties = new MstProperties();
     properties.Set(Mst.Args.Names.RoomName, zoneId);        // Имя комнаты
-    properties.Set(Mst.Args.Names.RoomOnlineScene, zoneId); // Имя сцены
-    properties.Set(Mst.Args.Names.RoomIsPrivate, true);     // Приватная комната
-    properties.Set(MstDictKeys.WORLD_ZONE, zoneId);         // Маркер зоны мира
+    properties.Set(Mst.Args.Names.RoomOnlineScene, zoneId); // Scene name
+    properties.Set(Mst.Args.Names.RoomIsPrivate, true);     // Private room
+    properties.Set(MstDictKeys.WORLD_ZONE, zoneId);         // World zone marker
     
     return properties;
 }
@@ -52,7 +52,7 @@ protected virtual MstProperties SpawnerProperties(string zoneId)
 ## Получение информации о зоне
 
 ```csharp
-// На сервере - поиск комнаты зоны по ID
+// On the server - find zone room by ID
 RegisteredRoom zoneRoom = roomsList.Values
     .Where(r => r.Options.CustomOptions.AsString(MstDictKeys.WORLD_ZONE) == zoneId)
     .FirstOrDefault();
@@ -75,7 +75,7 @@ var game = new GameInfoPacket
 ## Клиентский запрос информации о зоне
 
 ```csharp
-// Запрос информации о зоне по ее ID
+// Request zone info by its ID
 Mst.Client.Connection.SendMessage(MstOpCodes.GetZoneRoomInfo, "Forest", (status, response) =>
 {
     if (status == ResponseStatus.Success)
@@ -107,18 +107,18 @@ public void RequestZoneTransition(string targetZoneId, Vector3 spawnPosition)
     {
         if (status == ResponseStatus.Success)
         {
-            // 2. Получение информации о зоне
+            // 2. Get zone information
             var zoneInfo = response.AsPacket<GameInfoPacket>();
             
-            // 3. Сохранение позиции появления для новой зоны
+            // 3. Save spawn position for the new zone
             PlayerPrefs.SetFloat("SpawnPosX", spawnPosition.x);
             PlayerPrefs.SetFloat("SpawnPosY", spawnPosition.y);
             PlayerPrefs.SetFloat("SpawnPosZ", spawnPosition.z);
             
-            // 4. Отключение от текущей зоны
+            // 4. Disconnect from current zone
             Mst.Client.Connection.Disconnect();
             
-            // 5. Подключение к новой зоне
+            // 5. Connect to the new zone
             ConnectToZone(zoneInfo.Address, zoneInfo.Id);
         }
     });
@@ -127,19 +127,19 @@ public void RequestZoneTransition(string targetZoneId, Vector3 spawnPosition)
 // Подключение к серверу зоны
 private void ConnectToZone(string address, int roomId)
 {
-    // Разбор адреса в формате "ip:port"
+    // Parse address in "ip:port" format
     string[] addressParts = address.Split(':');
     string ip = addressParts[0];
     int port = int.Parse(addressParts[1]);
     
-    // Подключение к серверу
+    // Connect to the server
     Mst.Client.Connection.Connect(ip, port, (successful, connectedPeer) =>
     {
         if (successful)
         {
             Debug.Log($"Connected to zone server: {address}");
             
-            // Присоединение к комнате после подключения к серверу
+            // Join the room after connecting to the server
             Mst.Client.Rooms.JoinRoom(roomId, "", (successfulJoin, roomAccess) =>
             {
                 if (successfulJoin)
@@ -299,11 +299,11 @@ private Task GlobalZoneEventHandler(IIncomingMessage message)
 }
 ```
 
-## Лучшие практики
+## Best Practices
 
-1. **Используйте зональное деление** для снижения нагрузки на сервер
-2. **Сохраняйте данные** при переходах между зонами
-3. **Оптимизируйте передачу данных** - отправляйте только необходимую информацию
-4. **Реализуйте плавные переходы** между зонами с экранами загрузки
-5. **Используйте общую систему событий** для синхронизации между зонами
-6. **Разделяйте обязанности** между сервером зоны и мастер-сервером
+1. **Use zone separation** to reduce server load
+2. **Save data** when moving between zones
+3. **Optimize data transfer** – send only what is necessary
+4. **Implement smooth transitions** between zones with loading screens
+5. **Use a shared event system** for synchronization between zones
+6. **Split responsibilities** between the zone server and the master server
