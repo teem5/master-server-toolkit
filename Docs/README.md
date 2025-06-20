@@ -28,13 +28,13 @@ Master Server Toolkit - это фреймворк для создания мно
 ### Аналитика и Мониторинг
 - [AnalyticsModule](Modules/AnalyticsModule.md) - Сбор и анализ игровых событий
 
-### Инструменты
-- [Tools](Tools/README.md) - Набор вспомогательных инструментов для разработки
-  - [UI Framework](Tools/UI/README.md) - Система пользовательского интерфейса
-  - [Attributes](Tools/Attributes.md) - Расширения для инспектора Unity
-  - [Terminal](Tools/Terminal.md) - Отладочный терминал
-  - [Tweener](Tools/Tweener.md) - Инструменты анимации
-  - [Utilities](Tools/Utilities.md) - Вспомогательные утилиты
+### Tools
+- [Tools](Tools/README.md) - Collection of helper utilities
+  - [UI Framework](Tools/UI/README.md) - User interface system
+  - [Attributes](Tools/Attributes.md) - Unity inspector extensions
+  - [Terminal](Tools/Terminal.md) - Debug terminal
+  - [Tweener](Tools/Tweener.md) - Animation utilities
+  - [Utilities](Tools/Utilities.md) - Helper functions
 
 ## Структура модулей
 
