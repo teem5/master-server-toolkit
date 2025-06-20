@@ -1,14 +1,14 @@
 # Master Server Toolkit - System Views
 
-## Обзор
+## Overview
 
-Система Views в Master Server Toolkit предоставляет мощный инструмент для организации пользовательского интерфейса. Она основана на концепции отдельных представлений, которые могут независимо отображаться, скрываться и анимироваться.
+The Views system in Master Server Toolkit provides a powerful tool for organizing the user interface. It is based on the concept of individual views that can be shown, hidden and animated independently.
 
-## Ключевые классы
+## Key Classes
 
 ### IUIView
 
-Интерфейс, определяющий базовые операции представления:
+Interface defining basic view operations:
 
 ```csharp
 public interface IUIView
@@ -28,7 +28,7 @@ public interface IUIView
 
 ### UIView
 
-Базовый класс представления, реализующий `IUIView`:
+Base view class implementing `IUIView`:
 
 ```csharp
 [RequireComponent(typeof(Canvas), typeof(GraphicRaycaster), typeof(CanvasGroup))]
@@ -46,30 +46,30 @@ public class UIView : MonoBehaviour, IUIView
     [SerializeField] protected bool blockInput = false;
     [SerializeField] protected bool unlockCursor = false;
     
-    // События
+    // Events
     public UnityEvent OnShowEvent;
     public UnityEvent OnHideEvent;
     public UnityEvent OnShowFinishedEvent;
     public UnityEvent OnHideFinishedEvent;
     
-    // Методы Show, Hide, Toggle
+    // Methods Show, Hide, Toggle
 }
 ```
 
 ### UIViewPanel
 
-Расширение `UIView` для создания панелей:
+`UIView` extension for creating panels:
 
 ```csharp
 public class UIViewPanel : UIView
 {
-    // Дополнительная функциональность для панелей
+    // Additional functionality for panels
 }
 ```
 
 ### UIViewSync
 
-Компонент для синхронизации нескольких представлений:
+Component for synchronizing multiple views:
 
 ```csharp
 public class UIViewSync : MonoBehaviour
@@ -78,13 +78,13 @@ public class UIViewSync : MonoBehaviour
     [SerializeField] protected List<string> syncViewIds = new List<string>();
     [SerializeField] protected bool hideOnStart = true;
     
-    // Синхронизирует состояние всех присоединенных представлений
+    // Synchronizes the state of all attached views
 }
 ```
 
 ### PopupView
 
-Специализированное представление для диалоговых окон:
+Specialized view for dialog windows:
 
 ```csharp
 public class PopupView : MonoBehaviour, IUIViewComponent
@@ -94,7 +94,7 @@ public class PopupView : MonoBehaviour, IUIViewComponent
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI messageText;
 
-    // События для подтверждения/отклонения
+    // Events for confirm/decline
     public UnityEvent OnConfirmEvent;
     public UnityEvent OnDeclineEvent;
 }
@@ -102,21 +102,21 @@ public class PopupView : MonoBehaviour, IUIViewComponent
 
 ## ViewsManager
 
-Статический класс для управления всеми представлениями:
+Static class for managing all views:
 
 ```csharp
 public static class ViewsManager
 {
-    // Проверка блокировки ввода и курсора
+    // Check for input blocking and cursor unlocking
     public static bool AnyInputBlockViewVisible { get; }
     public static bool AnyCursorUnlockViewVisible { get; }
 
-    // Регистрация и получение представлений
+    // Registration and retrieval of views
     public static void Register(string viewId, IUIView view);
     public static void Unregister(string viewId);
     public static T GetView<T>(string viewId) where T : class, IUIView;
 
-    // Управление представлениями
+    // View management
     public static void Show(string viewId);
     public static void Hide(string viewId);
     public static void HideAllViews(bool instantly = false);
@@ -124,11 +124,11 @@ public static class ViewsManager
 }
 ```
 
-## Компоненты взаимодействия с представлениями
+## Components for Working with Views
 
 ### IUIViewComponent
 
-Интерфейс для компонентов, работающих с представлениями:
+Interface for components that work with views:
 
 ```csharp
 public interface IUIViewComponent
@@ -140,18 +140,18 @@ public interface IUIViewComponent
 
 ### IUIViewInputHandler
 
-Интерфейс для обработчиков ввода:
+Interface for input handlers:
 
 ```csharp
 public interface IUIViewInputHandler : IUIViewComponent
 {
-    // Специфичная логика обработки ввода
+    // Specific input handling logic
 }
 ```
 
 ### UIViewKeyInputHandler
 
-Обработчик ввода с клавиатуры:
+Keyboard input handler:
 
 ```csharp
 public class UIViewKeyInputHandler : MonoBehaviour, IUIViewInputHandler
@@ -159,13 +159,13 @@ public class UIViewKeyInputHandler : MonoBehaviour, IUIViewInputHandler
     [SerializeField] protected KeyCode toggleKey = KeyCode.Escape;
     [SerializeField] protected string toggleViewId = "";
     
-    // Переключает вид при нажатии указанной клавиши
+    // Toggles the view when the specified key is pressed
 }
 ```
 
 ### IUIViewTweener
 
-Интерфейс для аниматоров представлений:
+Interface for view animators:
 
 ```csharp
 public interface IUIViewTweener : MonoBehaviour
@@ -179,7 +179,7 @@ public interface IUIViewTweener : MonoBehaviour
 
 ## UI Sound Components
 
-Компоненты для воспроизведения звуков UI:
+Components for playing UI sounds:
 
 ```csharp
 public class UIViewSound : MonoBehaviour, IUIViewComponent
@@ -187,7 +187,7 @@ public class UIViewSound : MonoBehaviour, IUIViewComponent
     [SerializeField] protected AudioClip showClip;
     [SerializeField] protected AudioClip hideClip;
     
-    // Воспроизводит звуки при появлении/скрытии представления
+    // Plays sounds when the view appears/disappears
 }
 
 public class UIButtonSound : MonoBehaviour
@@ -195,7 +195,7 @@ public class UIButtonSound : MonoBehaviour
     [SerializeField] protected AudioClip clickClip;
     [SerializeField] protected AudioClip hoverClip;
     
-    // Добавляет звуки к кнопкам
+    // Adds sounds to buttons
 }
 
 public class UIToggleSound : MonoBehaviour 
@@ -203,13 +203,13 @@ public class UIToggleSound : MonoBehaviour
     [SerializeField] protected AudioClip onClip;
     [SerializeField] protected AudioClip offClip;
     
-    // Добавляет звуки к переключателям
+    // Adds sounds to toggles
 }
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Базовое создание представления
+### Basic View Creation
 
 ```csharp
 public class GameMenuView : UIView 
@@ -222,7 +222,7 @@ public class GameMenuView : UIView
     {
         base.Awake();
         
-        // Подписка на события кнопок
+        // Subscribe to button events
         playButton.onClick.AddListener(OnPlayClick);
         optionsButton.onClick.AddListener(OnOptionsClick);
         quitButton.onClick.AddListener(OnQuitClick);
@@ -230,9 +230,9 @@ public class GameMenuView : UIView
     
     private void OnPlayClick()
     {
-        // Скрываем текущее представление
+        // Hide the current view
         Hide();
-        // Показываем представление выбора игры
+        // Show the game selection view
         ViewsManager.Show("GameSelectionView");
     }
     
@@ -248,44 +248,44 @@ public class GameMenuView : UIView
 }
 ```
 
-### Создание диалога подтверждения
+### Creating a Confirmation Dialog
 
 ```csharp
-// Получение popup представления
+// Get the popup view
 var popup = ViewsManager.GetView<PopupView>("ConfirmPopup");
 
-// Настройка текста
-popup.SetTitle("Подтверждение");
-popup.SetMessage("Вы уверены, что хотите выйти?");
+// Set text
+popup.SetTitle("Confirmation");
+popup.SetMessage("Are you sure you want to quit?");
 
-// Подписка на события
+// Subscribe to events
 popup.OnConfirmEvent.AddListener(() => {
-    // Действие при подтверждении
+    // Action on confirm
     Application.Quit();
 });
 
 popup.OnDeclineEvent.AddListener(() => {
-    // Действие при отмене
+    // Action on cancel
     popup.Hide();
 });
 
-// Показ popup
+// Show the popup
 popup.Show();
 ```
 
-### Работа с анимированными представлениями
+### Working with Animated Views
 
 ```csharp
-// Создание анимированного представления
+// Create an animated view
 var view = gameObject.AddComponent<UIView>();
-var tweener = gameObject.AddComponent<FadeTweener>(); // Наследник IUIViewTweener
+var tweener = gameObject.AddComponent<FadeTweener>(); // Implements IUIViewTweener
 
-// Показ с анимацией
-view.Show(); // Анимированный
-view.Show(true); // Мгновенный
+// Show with animation
+view.Show(); // Animated
+view.Show(true); // Instant
 
-// Подписка на завершение анимации
+// Subscribe to animation finished event
 view.OnShowFinishedEvent.AddListener(() => {
-    Debug.Log("Анимация появления завершена");
+    Debug.Log("Show animation finished");
 });
 ```
