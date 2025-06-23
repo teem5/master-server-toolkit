@@ -22,19 +22,19 @@ Mst.Settings    // MstAdvancedSettings
 ### Main components:
 ```csharp
 // Client methods
-Mst.Client      // MstClient - для игровых клиентов
-Mst.Server      // MstServer - для игровых серверов
+Mst.Client // MstClient - for game clients
+Mst.Server // MstServer - for game servers
 
 // Utilities and helpers
-Mst.Helper      // Вспомогательные методы
-Mst.Security    // Безопасность и шифрование
-Mst.Create      // Создание сокетов и сообщений
-Mst.Concurrency // Работа с потоками
+Mst.Helper // Helper methods
+Mst.Security // Security and encryption
+Mst.Create // Creating sockets and messages
+Mst.Concurrency // Working with threads
 
 // Systems
-Mst.Events      // Канал событий
-Mst.Runtime     // Работа с данными времени выполнения
-Mst.Args        // Аргументы командной строки
+Mst.Events // Event channel
+Mst.Runtime // Working with runtime data
+Mst.Args // Command line arguments
 ```
 
 ## MasterServerBehaviour class
