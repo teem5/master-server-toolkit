@@ -63,13 +63,13 @@ Each module typically consists of the following components:
    // Connect to server
    Mst.Client.Connection.Connect("127.0.0.1", 5000, (successful, error) => {
        if (successful)
-           Debug.Log("Подключение установлено");
+           Debug.Log("Connection established");
    });
 
    // Use modules
    Mst.Client.Auth.SignIn(username, password, (successful, error) => {
        if (successful)
-           Debug.Log("Аутентификация успешна");
+           Debug.Log("Authentication successful");
    });
    ```
 

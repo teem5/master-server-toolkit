@@ -193,7 +193,7 @@ public class LanguageSelector : MonoBehaviour
 }
 ```
 
-## Динамическая локализация
+## Dynamic localization
 
 ### Localization with parameters:
 ```csharp
@@ -232,7 +232,7 @@ public static string GetLocalizedEnum<T>(T enumValue) where T : Enum
     return Mst.Localization[key];
 }
 
-// В файле локализации:
+// In the localization file:
 # enum_GameMode_Single;Single Player;Одиночная игра;Einzelspieler
 # enum_GameMode_Multiplayer;Multiplayer;Многопользовательская игра;Mehrspieler
 ```

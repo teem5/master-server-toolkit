@@ -34,11 +34,11 @@ System for sending email messages. Used for registration confirmation, password 
 
 ## Component interaction
 
-![Архитектура ядра](../Images/core_architecture.png)
+![Core architecture](../Images/core_architecture.png)
 
 ### Key relationships:
 
-1. **MasterServer** содержит центральный класс `Mst`, который предоставляет доступ ко всем другим компонентам:
+1. **MasterServer** contains the central `Mst` class that provides access to all other components:
    ```csharp
    // Access to the client
    Mst.Client

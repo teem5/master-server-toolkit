@@ -10,13 +10,13 @@ Operation codes for network messages between client and server.
 ### Basic operations:
 ```csharp
 // Errors and ping
-MstOpCodes.Error        // Сообщения об ошибках
-MstOpCodes.Ping         // Проверка связи
+MstOpCodes.Error        // Error messages
+MstOpCodes.Ping         // Connection check
 
 // Authentication
-MstOpCodes.SignIn       // Вход в аккаунт
-MstOpCodes.SignUp       // Регистрация
-MstOpCodes.SignOut      // Выход
+MstOpCodes.SignIn       // Sign in
+MstOpCodes.SignUp       // Sign up
+MstOpCodes.SignOut      // Sign out
 ```
 
 ### Usage example:
@@ -43,7 +43,7 @@ MstOpCodes.ConfirmEmail
 MstOpCodes.ChangePassword
 ```
 
-#### 2. Комнаты и спавны:
+#### 2. Rooms and spawns:
 ```csharp
 MstOpCodes.RegisterRoomRequest
 MstOpCodes.DestroyRoomRequest
@@ -52,7 +52,7 @@ MstOpCodes.SpawnProcessRequest
 MstOpCodes.CompleteSpawnProcess
 ```
 
-#### 3. Лобби:
+#### 3. Lobbies:
 ```csharp
 MstOpCodes.CreateLobby
 MstOpCodes.JoinLobby
@@ -89,7 +89,7 @@ MstEventKeys.showLobbyListView
 ### Usage example:
 ```csharp
 // Show a dialog
-Mst.Events.Invoke(MstEventKeys.showOkDialogBox, "Добро пожаловать!");
+Mst.Events.Invoke(MstEventKeys.showOkDialogBox, "Welcome!");
 
 // Subscribe to an event
 Mst.Events.AddListener(MstEventKeys.gameStarted, OnGameStarted);
@@ -281,7 +281,7 @@ Mst.Server.SendMessage(peer, CustomOpCodes.UpdatePlayerData, message);
 // Handle using events
 Mst.Events.AddListener(GameEventKeys.itemCrafted, (msg) => {
     var itemData = msg.As<CraftedItem>();
-    // Обработка
+    // Handling
 });
 ```
 

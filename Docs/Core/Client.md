@@ -87,7 +87,7 @@ connector.serverPort = 5000;
 connector.connectOnStart = true;
 ```
 
-### Аргументы командной строки:
+### Command line arguments:
 ```bash
 # Automatic IP and port configuration
 ./Client.exe -masterip 192.168.1.100 -masterport 5000

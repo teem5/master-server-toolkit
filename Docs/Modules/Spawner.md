@@ -160,7 +160,7 @@ Mst.Client.Spawners.GetFinalizationData(spawnId, (successful, data) =>
 });
 ```
 
-## Управление регионами
+## Region management
 
 ```csharp
 // Get all regions
@@ -174,7 +174,7 @@ var options = new SpawnerOptions { Region = "eu-west" };
 var spawner = spawnersModule.CreateSpawner(peer, options);
 ```
 
-## Балансировка нагрузки
+## Load balancing
 
 ```csharp
 // Example of balancing by least loaded servers
@@ -192,7 +192,7 @@ public RegisteredSpawner GetLeastBusySpawner(string region)
         .FirstOrDefault(s => s.CanSpawnAnotherProcess());
 }
 
-// Расширенная логика выбора спаунера
+// Advanced spawner selection logic
 public RegisteredSpawner GetOptimalSpawner(MstProperties options)
 {
     string region = options.AsString(Mst.Args.Names.RoomRegion, "");
@@ -212,7 +212,7 @@ public RegisteredSpawner GetOptimalSpawner(MstProperties options)
 }
 ```
 
-## Практический пример
+## Practical example
 
 ### System setup:
 ```csharp

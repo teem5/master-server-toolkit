@@ -82,7 +82,7 @@ public class AccountsModule : BaseServerModule
     
     public override void Initialize(IServer server)
     {
-        // Регистрация обработчиков
+        // Register handlers
         server.RegisterMessageHandler(MstOpCodes.SignIn, HandleSignIn);
         server.RegisterMessageHandler(MstOpCodes.SignUp, HandleSignUp);
     }

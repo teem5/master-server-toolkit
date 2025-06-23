@@ -74,7 +74,7 @@ NotificationRecipient newRecipient = notificationModule.AddRecipient(userExtensi
 notificationModule.RemoveRecipient(userId);
 ```
 
-## Клиентская часть - MstNotificationClient
+## Client side - MstNotificationClient
 
 ```csharp
 // Get the client
@@ -120,16 +120,16 @@ notificationClient.Unsubscribe((isSuccess, error) =>
 notificationClient.OnNotificationReceivedEvent -= OnNotificationReceived;
 ```
 
-## Пакеты и структуры
+## Packets and structures
 
 ### NotificationPacket:
 ```csharp
 public class NotificationPacket : SerializablePacket
 {
-    public int RoomId { get; set; } = -1;               // ID комнаты (если отправляется в комнату)
-    public string Message { get; set; } = string.Empty; // Текст уведомления
-    public List<int> Recipients { get; set; } = new List<int>();        // Список получателей
-    public List<int> IgnoreRecipients { get; set; } = new List<int>();  // Исключения
+    public int RoomId { get; set; } = -1;               // Room ID (if sent to a room)
+    public string Message { get; set; } = string.Empty; // Notification text
+    public List<int> Recipients { get; set; } = new List<int>();        // List of recipients
+    public List<int> IgnoreRecipients { get; set; } = new List<int>();  // Exclusions
 }
 ```
 
@@ -140,7 +140,7 @@ public class NotificationRecipient
     public string UserId { get; set; }
     public IPeer Peer { get; set; }
     
-    // Отправка уведомления конкретному получателю
+    // Send notification to a specific recipient
     public void Notify(string message)
     {
         Peer.SendMessage(MstOpCodes.Notification, message);
@@ -148,33 +148,33 @@ public class NotificationRecipient
 }
 ```
 
-## Серверная реализация - Пользовательский модуль уведомлений
+## Server implementation - Custom notification module
 
-Пример создания расширенного модуля уведомлений:
+Example of creating an extended notification module:
 
 ```csharp
 public class GameNotificationModule : NotificationModule
 {
-    // Форматированные уведомления
+    // Formatted notifications
     public void SendSystemNotification(string message)
     {
-        string formattedMessage = $"[СИСТЕМА]: {message}";
+        string formattedMessage = $"[SYSTEM]: {message}";
         NoticeToAll(formattedMessage);
     }
     
     public void SendAdminNotification(string message, string adminName)
     {
-        string formattedMessage = $"[АДМИН - {adminName}]: {message}";
-        NoticeToAll(formattedMessage, true); // Сохраняем как обещанное сообщение
+        string formattedMessage = $"[ADMIN - {adminName}]: {message}";
+        NoticeToAll(formattedMessage, true); // Save as a promised message
     }
     
     public void SendAchievementNotification(int peerId, string achievementTitle)
     {
-        string formattedMessage = $"[ДОСТИЖЕНИЕ]: Вы получили '{achievementTitle}'!";
+        string formattedMessage = $"[ACHIEVEMENT]: You received '{achievementTitle}'!";
         NoticeToRecipient(peerId, formattedMessage);
     }
     
-    // Уведомления с json-данными
+    // Notifications with JSON data
     public void SendJSONNotification(int peerId, string type, object data)
     {
         var notification = new JSONNotification
@@ -187,7 +187,7 @@ public class GameNotificationModule : NotificationModule
         NoticeToRecipient(peerId, jsonMessage);
     }
     
-    // Класс для json-уведомлений
+    // Class for JSON notifications
     [Serializable]
     private class JSONNotification
     {
@@ -197,9 +197,9 @@ public class GameNotificationModule : NotificationModule
 }
 ```
 
-## Интеграция с UI
+## UI integration
 
-Пример обработки уведомлений в пользовательском интерфейсе:
+Example of handling notifications in the user interface:
 
 ```csharp
 public class NotificationUIManager : MonoBehaviour
@@ -210,13 +210,13 @@ public class NotificationUIManager : MonoBehaviour
     
     private void Start()
     {
-        // Получить клиент уведомлений
+        // Get the notification client
         var notificationClient = Mst.Client.Notifications;
         
-        // Подписаться на события
+        // Subscribe to events
         notificationClient.OnNotificationReceivedEvent += ShowNotification;
         
-        // Подписаться на получение уведомлений от сервера
+        // Subscribe to notifications from the server
         notificationClient.Subscribe((isSuccess, error) =>
         {
             if (!isSuccess)
@@ -226,18 +226,18 @@ public class NotificationUIManager : MonoBehaviour
         });
     }
     
-    // Обработка простого текстового уведомления
+    // Handle a simple text notification
     public void ShowNotification(string message)
     {
-        // Проверка на JSON
+        // Check for JSON
         if (message.StartsWith("{") && message.EndsWith("}"))
         {
             try
             {
-                // Пытаемся распарсить как JSON
+                // Try to parse as JSON
                 JsonNotification notification = JsonUtility.FromJson<JsonNotification>(message);
                 
-                // Отобразить в зависимости от типа
+                // Display depending on the type
                 switch (notification.Type)
                 {
                     case "achievement":
@@ -253,36 +253,36 @@ public class NotificationUIManager : MonoBehaviour
             }
             catch
             {
-                // Если не JSON, отображаем как обычный текст
+                // If not JSON, display as plain text
                 CreateTextNotification(message);
             }
         }
         else
         {
-            // Обычное текстовое сообщение
+            // Plain text message
             CreateTextNotification(message);
         }
     }
     
-    // Создание уведомления в UI
+    // Create a notification in the UI
     private void CreateTextNotification(string text)
     {
         GameObject notification = Instantiate(notificationPrefab, notificationsContainer);
         notification.GetComponentInChildren<TextMeshProUGUI>().text = text;
         
-        // Автоматически уничтожить через время
+        // Automatically destroy after a delay
         Destroy(notification, displayTime);
     }
     
-    // Кастомные обработчики для специальных уведомлений
+    // Custom handlers for special notifications
     private void ShowAchievementNotification(string data)
     {
-        // Кастомная логика для отображения уведомления о достижении
+        // Custom logic to display an achievement notification
     }
     
     private void ShowSystemNotification(string data)
     {
-        // Кастомная логика для отображения системного уведомления
+        // Custom logic to display a system notification
     }
     
     [Serializable]
@@ -294,7 +294,7 @@ public class NotificationUIManager : MonoBehaviour
     
     private void OnDestroy()
     {
-        // Отписаться
+        // Unsubscribe
         var notificationClient = Mst.Client.Notifications;
         if (notificationClient != null)
         {
@@ -304,12 +304,12 @@ public class NotificationUIManager : MonoBehaviour
 }
 ```
 
-## Пример использования из комнаты
+## Example usage from a room
 
 ```csharp
 public class RoomManager : MonoBehaviour, IRoomManager
 {
-    // Отправить уведомление всем игрокам в комнате, когда один из игроков готов
+    // Send a notification to all players in the room when one player is ready
     public void OnPlayerReadyStatusChanged(int peerId, bool isReady)
     {
         var player = Mst.Server.Rooms.GetPlayer(currentRoomId, peerId);
@@ -318,28 +318,28 @@ public class RoomManager : MonoBehaviour, IRoomManager
         {
             var username = player.GetExtension<IUserPeerExtension>()?.Username ?? "Unknown";
             
-            // Создать пакет уведомления
+            // Create a notification packet
             var packet = new NotificationPacket
             {
                 RoomId = currentRoomId,
-                Message = $"Игрок {username} готов к игре!",
-                IgnoreRecipients = new List<int> { peerId } // Не отправлять самому игроку
+                Message = $"Player {username} is ready to play!",
+                IgnoreRecipients = new List<int> { peerId } // Do not send to the player themselves
             };
             
-            // Отправить уведомление через сервер
+            // Send the notification via the server
             Mst.Server.Connection.SendMessage(MstOpCodes.Notification, packet);
         }
     }
 }
 ```
 
-## Обещанные сообщения
+## Promised messages
 
-Особенность модуля уведомлений - возможность сохранять "обещанные сообщения", которые будут доставлены новым пользователям при входе в систему. Это полезно для системных объявлений, новостей, которые должны получить все игроки.
+A special feature of the notification module is the ability to store "promised messages" that will be delivered to new users when they log in. This is useful for system announcements or news that every player should receive.
 
 ```csharp
-// Отправить всем и сохранить как обещанное сообщение
-notificationModule.NoticeToAll("Новое обновление игры! Версия 1.2.0 доступна!", true);
+// Send to everyone and save as a promised message
+notificationModule.NoticeToAll("New game update! Version 1.2.0 available!", true);
 ```
 
 Configuring how many promised messages are stored:
