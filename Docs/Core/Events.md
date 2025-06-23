@@ -240,10 +240,10 @@ void OnDestroy()
 ```
 
 4. **Use channels for logical grouping**:
-- Игровые события → "game"
-- UI события → "ui"
-- Сетевые события → "network"
-- Системные события → "system"
+Game events → "game"
+UI events → "ui"
+Network events → "network"
+System events → "system"
 
 5. **Handle exceptions**:
 ```csharp
