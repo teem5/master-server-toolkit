@@ -36,7 +36,7 @@ public class MyClientModule : BaseClientBehaviour
 }
 ```
 
-### Основные методы:
+### Main methods:
 ```csharp
 // Register a message handler
 RegisterMessageHandler(IPacketHandler handler);
@@ -53,7 +53,7 @@ ClearConnection(bool clearHandlers = true);
 
 Base class for client modules.
 
-### Пример:
+### Example:
 ```csharp
 public class GameStatisticsModule : BaseClientModule
 {
