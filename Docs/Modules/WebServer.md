@@ -24,9 +24,9 @@ Main class of the web server module.
 [SerializeField] protected TextAsset startPage;
 ```
 
-### Запуск и остановка:
+### Start and stop:
 ```csharp
-// Инициализация с автозапуском
+// Initialization with auto start
 public override void Initialize(IServer server)
 {
     if (autostart)
@@ -35,42 +35,42 @@ public override void Initialize(IServer server)
     }
 }
 
-// Запуск вручную
+// Start manually
 var webServer = Mst.Server.Modules.GetModule<WebServerModule>();
-webServer.Listen(); // Используя настройки по умолчанию
+webServer.Listen(); // Using default settings
 
-// Запуск с указанием URL
+// Start with a specific URL
 webServer.Listen("http://localhost:8080");
 
-// Остановка сервера
+// Stop the server
 webServer.Stop();
 ```
 
-### Аргументы командной строки:
+### Command line arguments:
 ```bash
---web-username "admin"    # Имя пользователя для доступа к веб-интерфейсу
---web-password "secret"   # Пароль для доступа к веб-интерфейсу
---web-port 8080           # Порт для HTTP сервера
---web-address "0.0.0.0"   # Адрес для прослушивания (0.0.0.0 для всех интерфейсов)
+--web-username "admin"    # Username for web interface access
+--web-password "secret"   # Password for web interface access
+--web-port 8080           # Port for the HTTP server
+--web-address "0.0.0.0"   # Listen address (0.0.0.0 for all interfaces)
 ```
 
-## Регистрация обработчиков
+## Registering handlers
 
-### HTTP методы (GET, POST, PUT, DELETE):
+### HTTP methods (GET, POST, PUT, DELETE):
 ```csharp
-// GET запрос
+// GET request
 webServer.RegisterGetHandler("stats", GetStatisticsHandler);
 
-// POST запрос
-webServer.RegisterPostHandler("users/create", CreateUserHandler, true); // true - требует авторизацию
+// POST request
+webServer.RegisterPostHandler("users/create", CreateUserHandler, true); // true - requires authorization
 
-// PUT запрос
+// PUT request
 webServer.RegisterPutHandler("users/update", UpdateUserHandler, true);
 
-// DELETE запрос
+// DELETE request
 webServer.RegisterDeleteHandler("users/delete", DeleteUserHandler, true);
 
-// Пример обработчика
+// Example handler
 private async Task<IHttpResult> GetStatisticsHandler(HttpListenerRequest request)
 {
     var stats = new
@@ -84,25 +84,25 @@ private async Task<IHttpResult> GetStatisticsHandler(HttpListenerRequest request
 }
 ```
 
-## Результаты HTTP
+## HTTP results
 
-### Типы результатов:
+### Result types:
 ```csharp
-// Текстовый ответ
+// Text response
 var stringResult = new StringResult("Hello, World!");
-stringResult.ContentType = "text/plain"; // по умолчанию
+stringResult.ContentType = "text/plain"; // default
 
-// JSON ответ
+// JSON response
 var jsonResult = new JsonResult(new { status = "ok", users = 5 });
 
-// Код состояния
+// Status code
 var badRequest = new BadRequest(); // 400
 var unauthorized = new Unauthorized(); // 401
 var notFound = new NotFound(); // 404
 var serverError = new InternalServerError("Database error"); // 500
 ```
 
-### Кастомный ответ:
+### Custom response:
 ```csharp
 public class HtmlResult : HttpResult
 {
@@ -124,7 +124,7 @@ public class HtmlResult : HttpResult
     }
 }
 
-// Использование
+// Usage
 private async Task<IHttpResult> GetDashboardHandler(HttpListenerRequest request)
 {
     string html = "<html><body><h1>Dashboard</h1></body></html>";
@@ -134,9 +134,9 @@ private async Task<IHttpResult> GetDashboardHandler(HttpListenerRequest request)
 
 ## Web Controllers
 
-Web контроллеры позволяют создавать структурированные группы обработчиков.
+Web controllers allow you to create structured groups of handlers.
 
-### Создание контроллера:
+### Creating a controller:
 ```csharp
 public class UsersController : WebController
 {
@@ -144,10 +144,10 @@ public class UsersController : WebController
     {
         base.Initialize(server);
         
-        // Настройка безопасности
+        // Security settings
         UseCredentials = true;
         
-        // Регистрация маршрутов
+        // Register routes
         WebServer.RegisterGetHandler("users/list", GetUsersList);
         WebServer.RegisterGetHandler("users/view", GetUserDetails);
         WebServer.RegisterPostHandler("users/create", CreateUser, true);
@@ -157,7 +157,7 @@ public class UsersController : WebController
     
     private async Task<IHttpResult> GetUsersList(HttpListenerRequest request)
     {
-        // Логика получения списка пользователей
+        // Logic for getting the list of users
         var users = new[] 
         { 
             new { id = 1, name = "John" },
@@ -169,13 +169,13 @@ public class UsersController : WebController
     
     private async Task<IHttpResult> GetUserDetails(HttpListenerRequest request)
     {
-        // Получение параметров запроса
+        // Get request parameters
         string id = request.QueryString["id"];
         
         if (string.IsNullOrEmpty(id))
             return new BadRequest();
         
-        // Логика получения данных пользователя
+        // Logic for obtaining user data
         var user = new { id = int.Parse(id), name = "John", email = "john@example.com" };
         
         return new JsonResult(user);
@@ -183,49 +183,49 @@ public class UsersController : WebController
     
     private async Task<IHttpResult> CreateUser(HttpListenerRequest request)
     {
-        // Чтение тела запроса
+        // Read request body
         using (var reader = new StreamReader(request.InputStream))
         {
             string body = await reader.ReadToEndAsync();
-            // Парсинг JSON и создание пользователя
+            // Parse JSON and create user
             
             return new JsonResult(new { success = true, message = "User created" });
         }
     }
     
-    // Другие методы...
+    // Other methods...
 }
 ```
 
-### Добавление контроллера:
+### Adding a controller:
 ```csharp
-// 1. Через добавление на GameObject
+// 1. By adding to a GameObject
 gameObject.AddComponent<UsersController>();
 
-// 2. Или программно
+// 2. Or programmatically
 var controller = new UsersController();
 Controllers.TryAdd(controller.GetType(), controller);
 controller.Initialize(this);
 ```
 
-## Встроенные контроллеры
+## Built-in controllers
 
 ### InfoWebController:
 ```csharp
-// Предоставляет информацию о сервере
-// GET /info - общая информация
-// GET /info/modules - список модулей
-// GET /info/connections - информация о подключениях
+// Provides information about the server
+// GET /info - general information
+// GET /info/modules - list of modules
+// GET /info/connections - connection information
 ```
 
 ### NotificationWebController:
 ```csharp
-// Отправка уведомлений через веб-интерфейс
-// POST /notifications/all - отправить всем
-// POST /notifications/room/{roomId} - отправить в комнату
-// POST /notifications/user/{userId} - отправить пользователю
+// Sending notifications via the web interface
+// POST /notifications/all - send to all
+// POST /notifications/room/{roomId} - send to a room
+// POST /notifications/user/{userId} - send to a user
 
-// Пример использования:
+// Example usage:
 // curl -X POST http://localhost:5056/notifications/all
 //   -u admin:admin
 //   -H "Content-Type: application/json"
@@ -234,32 +234,32 @@ controller.Initialize(this);
 
 ### AnalyticsWebController:
 ```csharp
-// Получение аналитических данных
-// GET /analytics/users - статистика пользователей
-// GET /analytics/rooms - статистика комнат
+// Retrieve analytics data
+// GET /analytics/users - user statistics
+// GET /analytics/rooms - room statistics
 ```
 
-## Обработка запросов
+## Handling requests
 
-### Чтение параметров запроса:
+### Reading request parameters:
 ```csharp
 private async Task<IHttpResult> SearchHandler(HttpListenerRequest request)
 {
-    // Query параметры (?name=value)
+    // Query parameters (?name=value)
     string query = request.QueryString["q"];
     string limit = request.QueryString["limit"] ?? "10";
     
-    // Заголовки
+    // Headers
     string authorization = request.Headers["Authorization"];
     string contentType = request.ContentType;
     
     // Cookies
     Cookie sessionCookie = request.Cookies["session"];
     
-    // URL параметры
+    // URL parameters
     string[] segments = request.Url.Segments;
     
-    // Результат
+    // Result
     return new JsonResult(new { 
         query = query,
         limit = int.Parse(limit),
@@ -268,15 +268,15 @@ private async Task<IHttpResult> SearchHandler(HttpListenerRequest request)
 }
 ```
 
-### Чтение тела запроса:
+### Reading request body:
 ```csharp
 private async Task<IHttpResult> CreateItemHandler(HttpListenerRequest request)
 {
-    // Проверка Content-Type
+    // Check Content-Type
     if (!request.ContentType.Contains("application/json"))
         return new BadRequest();
     
-    // Чтение тела запроса
+    // Read request body
     string body;
     using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
     {
@@ -285,10 +285,10 @@ private async Task<IHttpResult> CreateItemHandler(HttpListenerRequest request)
     
     try
     {
-        // Десериализация JSON
+        // JSON deserialization
         var data = JsonUtility.FromJson<ItemData>(body);
         
-        // Создание объекта
+        // Create an object
         string itemId = Guid.NewGuid().ToString();
         
         return new JsonResult(new { 
@@ -310,21 +310,21 @@ public class ItemData
 }
 ```
 
-## Аутентификация и авторизация
+## Authentication and authorization
 
-### Настройка базовой аутентификации:
+### Configuring basic authentication:
 ```csharp
-// 1. В Inspector
+// 1. In the Inspector
 [SerializeField] protected bool useCredentials = true;
 [SerializeField] protected string username = "admin";
 [SerializeField] protected string password = "admin";
 
-// 2. В коде при регистрации обработчика
-// true - требуется авторизация, false - публичный доступ
+// 2. In code during handler registration
+// true - requires authorization, false - public access
 webServer.RegisterGetHandler("admin/stats", AdminStatsHandler, true);
 ```
 
-### Кастомная авторизация:
+### Custom authorization:
 ```csharp
 public class CustomAuthController : WebController
 {
@@ -338,7 +338,7 @@ public class CustomAuthController : WebController
     {
         base.Initialize(server);
         
-        // Отключаем встроенную Basic Authentication
+        // Disable built-in Basic Authentication
         UseCredentials = false;
         
         WebServer.RegisterGetHandler("api/data", GetApiData);
@@ -346,31 +346,31 @@ public class CustomAuthController : WebController
     
     private async Task<IHttpResult> GetApiData(HttpListenerRequest request)
     {
-        // Проверка API ключа
+        // Check the API key
         string apiKey = request.Headers["X-API-Key"];
         
         if (string.IsNullOrEmpty(apiKey) || !apiKeys.ContainsValue(apiKey))
             return new Unauthorized();
         
-        // Авторизованный доступ
+        // Authorized access
         return new JsonResult(new { data = "Secure API data" });
     }
 }
 ```
 
-## Создание веб-интерфейса
+## Creating a web interface
 
-### Встроенная стартовая страница:
+### Built-in start page:
 ```csharp
 [Header("Assets")]
 [SerializeField] protected TextAsset startPage;
 
-// HTML страница с плейсхолдерами
-// #MST-TITLE# - будет заменено на "MST v.X.X.X"
-// #MST-GREETINGS# - будет заменено на "MST v.X.X.X"
+// HTML page with placeholders
+// #MST-TITLE# will be replaced with "MST v.X.X.X"
+// #MST-GREETINGS# will be replaced with "MST v.X.X.X"
 ```
 
-### Создание HTML контроллера:
+### Creating an HTML controller:
 ```csharp
 public class DashboardController : WebController
 {
@@ -381,10 +381,10 @@ public class DashboardController : WebController
     {
         base.Initialize(server);
         
-        // Публичные страницы
+        // Public pages
         WebServer.RegisterGetHandler("login", LoginPage, false);
         
-        // Защищенные страницы
+        // Protected pages
         WebServer.RegisterGetHandler("dashboard", DashboardPage, true);
         WebServer.RegisterGetHandler("dashboard/users", UsersPage, true);
     }
@@ -398,11 +398,11 @@ public class DashboardController : WebController
     
     private async Task<IHttpResult> DashboardPage(HttpListenerRequest request)
     {
-        // Получение статистики
+        // Get statistics
         var playersCount = Mst.Server.ConnectionsCount;
         var roomsCount = Mst.Server.Modules.GetModule<RoomsModule>()?.GetRooms().Count ?? 0;
         
-        // Подстановка данных в шаблон
+        // Substitute data into the template
         string html = dashboardHtmlTemplate.text
             .Replace("{{PLAYERS_COUNT}}", playersCount.ToString())
             .Replace("{{ROOMS_COUNT}}", roomsCount.ToString())
@@ -415,9 +415,9 @@ public class DashboardController : WebController
 }
 ```
 
-## RESTful API для внешних сервисов
+## RESTful API for external services
 
-### Пример игрового API:
+### Game API example:
 ```csharp
 public class GameApiController : WebController
 {
@@ -428,11 +428,11 @@ public class GameApiController : WebController
     {
         base.Initialize(server);
         
-        // Получение зависимостей
+        // Get dependencies
         authModule = server.GetModule<AuthModule>();
         profilesModule = server.GetModule<ProfilesModule>();
         
-        // API маршруты
+        // API routes
         WebServer.RegisterGetHandler("api/players", GetPlayers, true);
         WebServer.RegisterGetHandler("api/players/online", GetOnlinePlayers, true);
         WebServer.RegisterGetHandler("api/player", GetPlayer, true);
@@ -452,23 +452,23 @@ public class GameApiController : WebController
     
     private async Task<IHttpResult> AddReward(HttpListenerRequest request)
     {
-        // Чтение тела запроса
+        // Read request body
         using (var reader = new StreamReader(request.InputStream))
         {
             string body = await reader.ReadToEndAsync();
             var data = JsonUtility.FromJson<RewardData>(body);
             
-            // Поиск пользователя
+            // Find user
             var user = authModule.GetLoggedInUserById(data.userId);
             
             if (user == null)
                 return new NotFound();
             
-            // Поиск профиля
+            // Find profile
             if (!user.Peer.TryGetExtension(out ProfilePeerExtension profileExt))
                 return new NotFound();
             
-            // Добавление валюты
+            // Add currency
             if (profileExt.Profile.TryGet(ProfilePropertyOpCodes.currency, out ObservableDictionary currencies))
             {
                 currencies.Set(data.currencyType, currencies.Get(data.currencyType, 0) + data.amount);
@@ -491,11 +491,11 @@ public class GameApiController : WebController
 }
 ```
 
-## Интеграция с внешними системами
+## Integration with external systems
 
-### Вебхуки (webhooks):
+### Webhooks:
 ```csharp
-// Отправка вебхука при событии в игре
+// Send a webhook when a game event occurs
 public class WebhookManager : MonoBehaviour
 {
     [SerializeField] private string webhookUrl = "https://example.com/webhook";
@@ -506,7 +506,7 @@ public class WebhookManager : MonoBehaviour
     {
         authModule = Mst.Server.Modules.GetModule<AuthModule>();
         
-        // Подписка на события
+        // Subscribe to events
         authModule.OnUserLoggedInEvent += OnUserLoggedIn;
         authModule.OnUserLoggedOutEvent += OnUserLoggedOut;
     }

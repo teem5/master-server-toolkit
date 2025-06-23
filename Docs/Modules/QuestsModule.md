@@ -65,16 +65,16 @@ public interface IQuestInfo
 }
 ```
 
-## QuestsModule (Сервер)
+## QuestsModule (Server)
 
 ```csharp
-// Зависимости
+// Dependencies
 AddDependency<AuthModule>();
 AddDependency<ProfilesModule>();
 
-// Настройки
+// Settings
 [Header("Permission"), SerializeField]
-protected bool clientCanUpdateProgress = false; // Может ли клиент обновлять прогресс
+protected bool clientCanUpdateProgress = false; // Can the client update progress
 
 [Header("Settings"), SerializeField]
 protected QuestsDatabase[] questsDatabases; // Quest databases
@@ -128,11 +128,11 @@ questsClient.CancelQuest("quest_key", (isCanceled) => {
 });
 ```
 
-## Пример создания квестов
+## Quest creation example
 
-### Создание базы данных квестов
+### Creating a quests database
 ```csharp
-// В редакторе Unity
+// In the Unity editor
 [CreateAssetMenu(menuName = "Master Server Toolkit/Quests/QuestsDatabase")]
 public class QuestsDatabase : ScriptableObject
 {
@@ -142,18 +142,18 @@ public class QuestsDatabase : ScriptableObject
     public IReadOnlyCollection<QuestData> Quests => quests;
 }
 
-// Создание базы данных
+// Creating the database
 var database = ScriptableObject.CreateInstance<QuestsDatabase>();
 ```
 
-### Создание квеста
+### Creating a quest
 ```csharp
-// В редакторе Unity
+// In the Unity editor
 var quest = ScriptableObject.CreateInstance<QuestData>();
 quest.name = "CollectResources";
-// Настройка квеста через инспектор
+// Configure the quest via the inspector
 
-// Программно
+// Via code
 var questData = new QuestData
 {
     Key = "collect_wood",
@@ -164,7 +164,7 @@ var questData = new QuestData
 };
 ```
 
-### Цепочки квестов
+### Quest chains
 ```csharp
 // Creating dependencies between quests
 var mainQuest = ScriptableObject.CreateInstance<QuestData>();

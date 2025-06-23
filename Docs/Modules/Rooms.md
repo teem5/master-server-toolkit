@@ -49,7 +49,7 @@ Mst.Server.Rooms.RegisterRoom(options, (room, error) =>
 });
 ```
 
-### Автоматическая регистрация:
+### Automatic registration:
 ```csharp
 public class GameServerManager : MonoBehaviour
 {
@@ -79,9 +79,9 @@ public class GameServerManager : MonoBehaviour
 }
 ```
 
-## Управление комнатой
+## Managing a Room
 
-### Обновление параметров:
+### Updating parameters:
 ```csharp
 // Modify room options
 var newOptions = room.Options;
@@ -98,7 +98,7 @@ room.RemovePlayer(peerId);
 var players = room.Players.Values;
 ```
 
-### Уничтожение комнаты:
+### Destroying a room:
 ```csharp
 // When the game ends
 Mst.Server.Rooms.DestroyRoom(room.RoomId, (successful, error) =>
@@ -119,9 +119,9 @@ void OnApplicationQuit()
 }
 ```
 
-## Подключение к комнате
+## Connecting to a Room
 
-### Поиск и подключение:
+### Finding and joining:
 ```csharp
 // Search for public rooms
 Mst.Client.Matchmaker.FindGames((games) =>
@@ -143,7 +143,7 @@ Mst.Client.Rooms.GetAccess(roomId, "", (access, error) =>
 });
 ```
 
-### Подключение с паролем:
+### Password-protected connection:
 ```csharp
 // Connect to a private room
 Mst.Client.Rooms.GetAccess(roomId, "secret_password", (access, error) =>
@@ -210,17 +210,17 @@ public class RoomServerManager : MonoBehaviour
 }
 ```
 
-## Фильтрация комнат
+## Room filtering
 
-### Поиск по критериям:
+### Searching by criteria:
 ```csharp
-// Создание фильтров
+// Create filters
 var filters = new MstProperties();
 filters.Set("map", "forest");
 filters.Set("gameMode", "pvp");
 filters.Set("maxPlayers", 10);
 
-// Поиск комнат с фильтрами
+// Find rooms using filters
 Mst.Client.Matchmaker.FindGames(filters, (games) =>
 {
     var filteredRooms = games.Where(g => 
@@ -233,7 +233,7 @@ Mst.Client.Matchmaker.FindGames(filters, (games) =>
 
 ### Custom filtering:
 ```csharp
-// На стороне сервера - переопределение GetPublicRoomOptions
+// On the server side - override GetPublicRoomOptions
 public override MstProperties GetPublicRoomOptions(IPeer player, RegisteredRoom room, MstProperties playerFilters)
 {
     var roomData = base.GetPublicRoomOptions(player, room, playerFilters);
@@ -252,7 +252,7 @@ public override MstProperties GetPublicRoomOptions(IPeer player, RegisteredRoom 
 }
 ```
 
-## События комнат
+## Room events
 
 ### Subscribing to events:
 ```csharp
@@ -283,7 +283,7 @@ room.OnPlayerLeftEvent += (player) =>
 };
 ```
 
-## UI для списка комнат
+## Room list UI
 
 ```csharp
 public class RoomListUI : MonoBehaviour
@@ -301,13 +301,13 @@ public class RoomListUI : MonoBehaviour
     
     void RefreshRoomList()
     {
-        // Очистка списка
+        // Clear the list
         foreach (Transform child in roomList)
         {
             Destroy(child.gameObject);
         }
         
-        // Получение комнат
+        // Retrieve rooms
         Mst.Client.Matchmaker.FindGames((games) =>
         {
             foreach (var game in games)

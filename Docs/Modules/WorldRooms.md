@@ -15,10 +15,10 @@ private string[] zoneScenes; // Zone scenes that will be started automatically
 protected SpawnersModule spawnersModule; // For launching zone servers
 ```
 
-## Автоматическое создание зон мира
+## Automatic World Zone Creation
 
 ```csharp
-// При регистрации спаунера автоматически запускаются все зоны
+// Automatically launch all zones when a spawner registers
 private async void Spawners_OnSpawnerRegisteredEvent(RegisteredSpawner spawner)
 {
     await Task.Delay(100);
@@ -33,14 +33,14 @@ private async void Spawners_OnSpawnerRegisteredEvent(RegisteredSpawner spawner)
 }
 ```
 
-## Настройка свойств зоны
+## Configuring Zone Properties
 
 ```csharp
-// Создание настроек для запуска зоны на спаунере
+// Create settings for launching a zone on the spawner
 protected virtual MstProperties SpawnerProperties(string zoneId)
 {
     var properties = new MstProperties();
-    properties.Set(Mst.Args.Names.RoomName, zoneId);        // Имя комнаты
+    properties.Set(Mst.Args.Names.RoomName, zoneId);        // Room name
     properties.Set(Mst.Args.Names.RoomOnlineScene, zoneId); // Scene name
     properties.Set(Mst.Args.Names.RoomIsPrivate, true);     // Private room
     properties.Set(MstDictKeys.WORLD_ZONE, zoneId);         // World zone marker
@@ -49,7 +49,7 @@ protected virtual MstProperties SpawnerProperties(string zoneId)
 }
 ```
 
-## Получение информации о зоне
+## Retrieving Zone Information
 
 ```csharp
 // On the server - find zone room by ID
@@ -57,7 +57,7 @@ RegisteredRoom zoneRoom = roomsList.Values
     .Where(r => r.Options.CustomOptions.AsString(MstDictKeys.WORLD_ZONE) == zoneId)
     .FirstOrDefault();
 
-// Формирование информации о зоне для отправки клиенту
+// Prepare zone information to send to the client
 var game = new GameInfoPacket
 {
     Id = zoneRoom.RoomId,
@@ -72,7 +72,7 @@ var game = new GameInfoPacket
 };
 ```
 
-## Клиентский запрос информации о зоне
+## Client Zone Info Request
 
 ```csharp
 // Request zone info by its ID
@@ -80,10 +80,10 @@ Mst.Client.Connection.SendMessage(MstOpCodes.GetZoneRoomInfo, "Forest", (status,
 {
     if (status == ResponseStatus.Success)
     {
-        // Получение данных о зоне
+        // Retrieve zone data
         var zoneInfo = response.AsPacket<GameInfoPacket>();
         
-        // Подключение к серверу зоны
+        // Connect to the zone server
         string address = zoneInfo.Address;
         int roomId = zoneInfo.Id;
         
@@ -96,13 +96,13 @@ Mst.Client.Connection.SendMessage(MstOpCodes.GetZoneRoomInfo, "Forest", (status,
 });
 ```
 
-## Переход между зонами
+## Switching Between Zones
 
 ```csharp
-// Клиентский код для перехода между зонами
+// Client code for switching between zones
 public void RequestZoneTransition(string targetZoneId, Vector3 spawnPosition)
 {
-    // 1. Запрос информации о целевой зоне
+    // 1. Request target zone information
     Mst.Client.Connection.SendMessage(MstOpCodes.GetZoneRoomInfo, targetZoneId, (status, response) =>
     {
         if (status == ResponseStatus.Success)
@@ -124,7 +124,7 @@ public void RequestZoneTransition(string targetZoneId, Vector3 spawnPosition)
     });
 }
 
-// Подключение к серверу зоны
+// Connect to the zone server
 private void ConnectToZone(string address, int roomId)
 {
     // Parse address in "ip:port" format
@@ -152,80 +152,80 @@ private void ConnectToZone(string address, int roomId)
 }
 ```
 
-## Интеграция с персистентным миром
+## Persistent World Integration
 
 ```csharp
-// Пример кода сервера зоны для обработки подключения игрока
+// Example zone server code for handling player connection
 protected override void OnPlayerJoinedRoom(RoomPlayer player)
 {
     base.OnPlayerJoinedRoom(player);
     
-    // Получение расширения пользователя
+    // Get user extension
     var userExt = player.GetExtension<IUserPeerExtension>();
     if (userExt != null)
     {
-        // Загрузка данных игрока для текущей зоны
+        // Load player data for the current zone
         LoadPlayerZoneData(userExt.UserId);
         
-        // Отправка данных о других игроках в зоне
+        // Send data about other players in the zone
         SendZonePlayersData(player);
     }
 }
 
-// Загрузка данных игрока для конкретной зоны
+// Load player data for a specific zone
 private void LoadPlayerZoneData(string userId)
 {
-    // Получение данных из профиля или базы данных
+    // Retrieve data from profile or database
     var zoneId = gameObject.scene.name;
     var zoneDataKey = $"zonedata_{zoneId}_{userId}";
     
-    // Запрос данных из профиля
+    // Request data from profile
     Mst.Server.Profiles.GetProfileValues(userId, new string[] { zoneDataKey }, (success, data) =>
     {
         if (success && data.Has(zoneDataKey))
         {
-            // Разбор данных зоны (позиция, инвентарь и т.д.)
+            // Parse zone data (position, inventory, etc.)
             var zoneData = data.AsString(zoneDataKey);
-            // Применение данных к игроку
+            // Apply data to player
             ApplyZoneDataToPlayer(userId, zoneData);
         }
         else
         {
-            // Использование данных по умолчанию для новых игроков в этой зоне
+            // Use default data for new players in this zone
             ApplyDefaultZoneData(userId);
         }
     });
 }
 ```
 
-## Сохранение данных при выходе из зоны
+## Saving Data When Leaving a Zone
 
 ```csharp
-// Сервер зоны: обработка выхода игрока из зоны
+// Zone server: handle player leaving the zone
 protected override void OnPlayerLeftRoom(RoomPlayer player)
 {
     base.OnPlayerLeftRoom(player);
     
-    // Получение расширения пользователя
+    // Get user extension
     var userExt = player.GetExtension<IUserPeerExtension>();
     if (userExt != null)
     {
-        // Сохранение данных игрока для текущей зоны
+        // Save player data for the current zone
         SavePlayerZoneData(userExt.UserId);
     }
 }
 
-// Сохранение данных игрока для конкретной зоны
+// Save player data for a specific zone
 private void SavePlayerZoneData(string userId)
 {
-    // Сбор данных игрока (позиция, инвентарь и т.д.)
+    // Gather player data (position, inventory, etc.)
     string zoneData = GenerateZoneDataForPlayer(userId);
     
-    // Формирование ключа зоны
+    // Form the zone key
     var zoneId = gameObject.scene.name;
     var zoneDataKey = $"zonedata_{zoneId}_{userId}";
     
-    // Сохранение в профиль
+    // Save to profile
     var data = new MstProperties();
     data.Set(zoneDataKey, zoneData);
     
@@ -233,11 +233,11 @@ private void SavePlayerZoneData(string userId)
 }
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Настройка перехода между зонами
+### Setting Up Zone Transitions
 ```csharp
-// Зона "Лес" соединяется с зоной "Пещера"
+// The "Forest" zone connects to the "Cave" zone
 public class ZoneTransition : MonoBehaviour
 {
     [SerializeField] private string targetZoneId = "Cave";
@@ -247,7 +247,7 @@ public class ZoneTransition : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Отправка запроса на переход в другую зону
+            // Send a request to move to another zone
             var zoneManager = FindObjectOfType<WorldZoneManager>();
             zoneManager.RequestZoneTransition(targetZoneId, spawnPosition);
         }
@@ -255,15 +255,15 @@ public class ZoneTransition : MonoBehaviour
 }
 ```
 
-### Глобальные события в зонах
+### Global Zone Events
 ```csharp
-// Система глобальных событий для синхронизации между зонами
+// Global event system for synchronizing between zones
 public class GlobalEventsManager : MonoBehaviour
 {
-    // Отправка глобального события всем зонам
+    // Send a global event to all zones
     public void BroadcastGlobalEvent(string eventType, MstProperties eventData)
     {
-        // Отправка события на мастер сервер
+        // Send the event to the master server
         var data = new MstProperties();
         data.Set("type", eventType);
         data.Set("data", eventData.ToJson());
@@ -272,7 +272,7 @@ public class GlobalEventsManager : MonoBehaviour
     }
 }
 
-// На мастер сервере
+// On the master server
 private Task GlobalZoneEventHandler(IIncomingMessage message)
 {
     try
@@ -281,7 +281,7 @@ private Task GlobalZoneEventHandler(IIncomingMessage message)
         string eventType = data.AsString("type");
         string eventData = data.AsString("data");
         
-        // Рассылка всем зонам
+        // Relay to all zones
         foreach (var room in roomsList.Values)
         {
             if (room.Options.CustomOptions.Has(MstDictKeys.WORLD_ZONE))

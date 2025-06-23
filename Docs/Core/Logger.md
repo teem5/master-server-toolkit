@@ -176,7 +176,7 @@ Logger("Game.UI")
 - Client: Warn and above
 - Development: Debug
 
-3. **Производительность**:
+3. **Performance**:
 ```csharp
 // Bad - always creates a string
 logger.Debug($"Processing {listItems.Count} items");
@@ -190,7 +190,7 @@ if (logger.IsLogging(LogLevel.Debug))
 
 4. **Message structure**:
 ```csharp
-// Последовательный формат
+// Sequential format
 logger.Info("Player [P12345] joined room [R67890] at position (10, 20, 30)");
 ```
 
@@ -212,7 +212,7 @@ public class MyModule : BaseServerModule
     {
         Logger.Info("Module initializing...");
         
-        // Подписка на события
+        // Subscribe to events
         Mst.Events.AddListener("playerConnected", msg => {
             Logger.Debug($"Player connected event: {msg}");
         });

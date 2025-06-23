@@ -24,7 +24,7 @@ public DatabaseAccessorFactory databaseAccessorFactory;
 [SerializeField] private ObservablePropertyPopulatorsDatabase populatorsDatabase;
 ```
 
-## Свойства профиля
+## Profile properties
 
 ### Creating the property system:
 ```csharp
@@ -128,7 +128,7 @@ public class ProfilesDatabaseAccessor : IProfilesDatabaseAccessor
 }
 ```
 
-## Типы наблюдаемых свойств
+## Observable property types
 
 ### Basic types:
 ```csharp
@@ -148,11 +148,11 @@ ObservableDictStringInt items = new ObservableDictStringInt();
 items.Add("sword", 1);
 ```
 
-## Серверные обновления
+## Server updates
 
-### Отправка обновлений с игрового сервера:
+### Sending updates from the game server:
 ```csharp
-// Создание пакета обновлений
+// Create an update packet
 var updates = new ProfileUpdatePacket();
 updates.UserId = userId;
 updates.Properties = new MstProperties();
@@ -186,7 +186,7 @@ maxUpdateSize = 1048576;
 profileLoadTimeoutSeconds = 10;
 ```
 
-## Примеры использования
+## Usage examples
 
 ### Gameplay statistics:
 ```csharp

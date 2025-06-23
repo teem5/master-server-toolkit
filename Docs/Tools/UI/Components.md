@@ -85,7 +85,7 @@ public class UILable : MonoBehaviour
 
 ### UIMultiLable
 
-Компонент для синхронизации нескольких текстовых меток:
+Component for synchronizing multiple text labels:
 
 ```csharp
 public class UIMultiLable : MonoBehaviour
@@ -168,9 +168,9 @@ public class LeaderboardView : UIView
         dataTable.Rebuild(scores.Count, 3);
         
         // Fill the headers
-        dataTable.SetValue(0, 0, "Ранг");
-        dataTable.SetValue(0, 1, "Игрок");
-        dataTable.SetValue(0, 2, "Счет");
+        dataTable.SetValue(0, 0, "Rank");
+        dataTable.SetValue(0, 1, "Player");
+        dataTable.SetValue(0, 2, "Score");
         
         // Fill player data
         for (int i = 0; i < scores.Count; i++)

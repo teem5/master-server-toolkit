@@ -18,7 +18,7 @@ private string pongMessage = "Hello, Pong!";
 public string PongMessage { get; set; }
 ```
 
-## Использование на сервере
+## Server usage
 
 ### Initialization:
 ```csharp
@@ -128,9 +128,9 @@ public class PingTester : MonoBehaviour
 }
 ```
 
-## Расширенная реализация Ping
+## Advanced Ping implementation
 
-### Обновление модуля для передачи дополнительной информации:
+### Updating the module to send additional information:
 
 ```csharp
 public class EnhancedPingModule : PingModule
@@ -176,10 +176,10 @@ public class EnhancedPingModule : PingModule
 }
 ```
 
-### Клиентская обработка расширенного ответа:
+### Client handling of the extended response:
 
 ```csharp
-// Отправка запроса
+// Send a request
 Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
 {
     if (status == ResponseStatus.Success)
@@ -188,7 +188,7 @@ Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
         
         try
         {
-            // Парсинг JSON-ответа
+            // Parse the JSON response
             PingResponseInfo pingInfo = JsonUtility.FromJson<PingResponseInfo>(jsonResponse);
             
             // Use the information
@@ -211,9 +211,9 @@ Mst.Client.Connection.SendMessage(MstOpCodes.Ping, (status, response) =>
 });
 ```
 
-## Интеграция с другими системами
+## Integration with other systems
 
-### Мониторинг соединения:
+### Connection monitoring:
 ```csharp
 public class ConnectionMonitor : MonoBehaviour
 {
@@ -357,7 +357,7 @@ public class AutoReconnector : MonoBehaviour
         
         Debug.Log($"Reconnect attempt {reconnectAttempts}/{maxReconnectAttempts}");
         
-        // Попытка переподключения
+        // Attempt to reconnect
         Mst.Client.Connection.Connect(Mst.Client.Connection.ConnectionIp, Mst.Client.Connection.ConnectionPort, (isSuccessful, error) =>
         {
             if (isSuccessful)
