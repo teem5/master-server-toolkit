@@ -161,9 +161,9 @@ void ConfigureLogging()
 // ./Game.exe -logLevel Debug -enableFileLog true
 ```
 
-## Рекомендации
+## Recommendations
 
-1. **Именование логгеров**: Используйте иерархические имена
+1. **Naming Loggers**: Use Hierarchical Names
 ```csharp
 Logger("Network.Client")
 Logger("Network.Server")
@@ -171,41 +171,41 @@ Logger("Game.Player")
 Logger("Game.UI")
 ```
 
-2. **Уровни в production**:
-- Сервер: Info и выше
-- Клиент: Warn и выше
-- Разработка: Debug
+2. **Levels in production**:
+- Server: Info and above
+- Client: Warn and above
+- Development: Debug
 
 3. **Производительность**:
 ```csharp
-// Плохо - создает строку всегда
+// Bad - always creates a string
 logger.Debug($"Processing {listItems.Count} items");
 
-// Хорошо - проверяет уровень сначала
+// Okay - checks the level first
 if (logger.IsLogging(LogLevel.Debug))
 {
     logger.Debug($"Processing {listItems.Count} items");
 }
 ```
 
-4. **Структура сообщений**:
+4. **Message structure**:
 ```csharp
 // Последовательный формат
 logger.Info("Player [P12345] joined room [R67890] at position (10, 20, 30)");
 ```
 
-5. **Конфиденциальность**:
+5. **Confidentiality**:
 ```csharp
-// Избегайте логирования чувствительных данных
+// Avoid logging sensitive data
 logger.Info($"User logged in: {user.Id}"); // ✓
 logger.Debug($"Password hash: {password.Substring(0, 8)}***"); // ✓
 logger.Error($"Login failed for: {user.Password}"); // ✗
 ```
 
-## Интеграция с MST
+## Integration with MST
 
 ```csharp
-// Использование с модулями
+// Use with modules
 public class MyModule : BaseServerModule
 {
     protected override void Initialize()
